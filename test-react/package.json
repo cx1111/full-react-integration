@@ -26,8 +26,8 @@
     "start": "react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "webpack --mode development ./src/index.tsx --output ./main.js",
-    "build": "webpack --mode production ./src/index.tsx --output ./main.js",
+    "dev": "webpack --mode development ./src/index.tsx --output ../test-django/testdjango/frontend/static/frontend/js/main.js",
+    "build": "webpack --mode production ./src/index.tsx --output ../test-django/testdjango/frontend/static/frontend/js/main.js",
     "watch": "webpack -w"
   },
   "eslintConfig": {
