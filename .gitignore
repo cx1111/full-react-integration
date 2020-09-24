@@ -1,3 +1,5 @@
 *.pyc
 
-test-django/testdjango/frontend/static/frontend/js/main.js
+db.sqlite3
+
+.vscode
