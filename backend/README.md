@@ -43,7 +43,7 @@ curl -H "Authorization: Bearer <accesstoken>" http://127.0.0.1:8000/api/private/
 To blacklist a refresh token:
 
 ```sh
-
+curl -X POST -d refresh=<refreshtoken> http://127.0.0.1:8000/api/token/blacklist/
 ```
 
 There is no provided endpoint to blacklist an access token, which are to expire quickly on their own.
