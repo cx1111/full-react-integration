@@ -1,9 +1,12 @@
 from django.http import HttpResponseBadRequest
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.views import APIView
+
+from user.serializers import UserSerializer
 
 
 class HelloView(APIView):
@@ -54,3 +57,18 @@ class BlacklistTokenView(APIView):
             return HttpResponseBadRequest(str(e))
 
         return Response({ 'loggedOut': True})
+
+
+class RegisterView(CreateAPIView):
+    """
+    Registration
+    """
+    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
+
+
+    # def get_permissions(self):
+    #     if self.request.method == 'POST':
+    #         self.permission_classes = (AllowAny,)
+    #     breakpoint()
+    #     return super(RegisterView, self).get_permissions()

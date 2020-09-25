@@ -15,4 +15,5 @@ urlpatterns = [
     path('api/token/blacklist/', views.BlacklistTokenView.as_view(), name='blacklist_token'),
 
     path('api/user/', views.UserInfoView.as_view(), name='user_info'),
+    path('register/', views.RegisterView.as_view(), name='register'),
 ]
