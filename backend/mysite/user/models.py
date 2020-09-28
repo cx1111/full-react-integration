@@ -11,15 +11,21 @@ class UserManager(BaseUserManager):
     Manager object with methods to create
     User instances.
     """
-    def create_user(self, email, password, username, is_active=False,
-                    is_admin=False):
+    def create_user(self, email: str, username: str, password:str = None, is_active : bool =False,
+                    is_admin : bool =False):
+        """
+        Flexible function to create a new user.
+        """
+
         if is_admin:
             is_active = True
 
         user = self.model(email=self.normalize_email(email.lower()),
                           username=self.model.normalize_username(username.lower()),
                           is_active=is_active, is_admin=is_admin)
-        user.set_password(password)
+
+        if password:
+            user.set_password(password)
         user.save(using=self._db)
 
         _ = Profile.objects.create(user=user)
