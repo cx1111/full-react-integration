@@ -3,3 +3,7 @@
 db.sqlite3
 
 .vscode
+
+localtests.py
+
+private-notes.md
