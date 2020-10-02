@@ -43,7 +43,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"email":"<email>"}' http:/
 To verify the account and set the password:
 
 ```sh
-curl -X POST -H "Content-Type: application/json" -d '{"uidb64":"<uidb64>","token":"<token>","password":"<password>","password2":"<password2>"}' http://127.0.0.1:8000/api/verify-account/
+curl -X POST -H "Content-Type: application/json" -d '{"uidb64":"<uidb64>","token":"<token>","password1":"<password1>","password2":"<password2>"}' http://127.0.0.1:8000/api/verify-account/
 ```
 
 

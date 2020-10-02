@@ -173,31 +173,10 @@ class ActivateUserView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        # data = JSONParser().parse(request)
-        # breakpoint()
-        # uidb64 = request.data.get('uidb64')
-        # token = request.data.get('token')
-        # # TODO: Serializer
-        # try:
-        #     uid = force_text(urlsafe_base64_decode(uidb64))
-        #     user = User.objects.get(pk=uid)
-        # except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        #     return HttpResponseBadRequest("No user found with the specified uid")
-
-        # if not token_generator.check_token(user, token):
-        #     # Figure out expired or invalid in general
-        #     return HttpResponseBadRequest("Invalid activation token")
-
-        # breakpoint()
         data = JSONParser().parse(request)
         serializer = ActivateUserSerializer(data=data)
         if serializer.is_valid():
             serializer.activate_user()
-            # with transaction.atomic():
-                # TODO: serializer save
-                # user.set_password(serializer.validated_data['password1'])
-                # user.is_active = True
-                # user.save()
-            return Response({ 'activated': True}, status=201)
+            return Response({ 'activated': True}, status=200)
 
         return Response(serializer.errors, status=400)
