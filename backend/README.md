@@ -43,7 +43,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"email":"<email>"}' http:/
 To verify the account and set the password:
 
 ```sh
-curl -X POST -H "Content-Type: application/json" -d '{"token":"<token>","password":"<password>","password2":"<password2>"}' http://127.0.0.1:8000/api/verify-account/
+curl -X POST -H "Content-Type: application/json" -d '{"uidb64":"<uidb64>","token":"<token>","password":"<password>","password2":"<password2>"}' http://127.0.0.1:8000/api/verify-account/
 ```
 
 
@@ -87,4 +87,3 @@ https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
 
 
 '{"uidb64":"MTU","token":"aay93c-34ed658248e42261ee407a2e984c3f66"}'
-

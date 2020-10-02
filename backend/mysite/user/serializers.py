@@ -10,9 +10,7 @@ from user.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
-        # write_only_fields = ('password',)
-        read_only_fields = ('id',)
+        fields = ('username', 'email')
 
     def create(self, validated_data):
         """
@@ -38,6 +36,10 @@ class ActivateUserSerializer(serializers.Serializer):
     password2 = serializers.CharField(max_length=100)
     uidb64 = serializers.CharField(max_length=50)
     token = serializers.CharField(max_length=50)
+
+    def __init__(self, *args, **kwargs):
+        super(ActivateUserSerializer, self).__init__(args, **kwargs)
+        self.user = None
 
     def validate_uidb64(self, value):
         uid = force_text(urlsafe_base64_decode(value))
