@@ -18,7 +18,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from mysite.utils import get_url_prefix
 from user.models import User
-from user.serializers import UserSerializer
+from user.serializers import ActivateUserSerializer, UserSerializer
 
 
 class HelloView(APIView):
@@ -90,14 +90,13 @@ def send_activation_email(request, user: User, uidb64: str, token: str):
         'domain': get_current_site(request),
         'url_prefix': get_url_prefix(request),
         'uidb64': uidb64,
-        'token': token
+        'token': token,
+        'expire_days': settings.RESET_TIMEOUT_DAYS
     }
     body = loader.render_to_string('user/email/register_email.html', context)
     send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
         [user.email], fail_silently=False)
     return
-
-
 
 
 
@@ -116,9 +115,10 @@ class RegisterView(APIView):
         data = JSONParser().parse(request)
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
-            user = serializer.save()
-            uidb64, token = create_token_info(user)
-            send_activation_email(request, user, uidb64, token)
+            with transaction.atomic():
+                user = serializer.save()
+                uidb64, token = create_token_info(user)
+                send_activation_email(request, user, uidb64, token)
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
@@ -147,8 +147,11 @@ class CheckActivationTokenView(APIView):
     Check whether a uidb64 and activation token are valid
     """
 
-    def get(self, request, uidb64, token):
+    def get(self, request):
+        uidb64 = request.data.get('uidb64')
+        token = request.data.get('token')
         # TODO: Serializer
+        # TODO: 200 response for invalid params?
         try:
             uid = force_text(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
@@ -158,6 +161,8 @@ class CheckActivationTokenView(APIView):
         if not token_generator.check_token(user, token):
             # Figure out expired or invalid in general
             return HttpResponseBadRequest("Invalid activation token")
+
+        return Response({ "valid":True}, status=200)
 
 
 class ActivateUserView(APIView):
@@ -167,24 +172,32 @@ class ActivateUserView(APIView):
     """
     permission_classes = (AllowAny,)
 
-    def post(self, request, uidb64, token):
+    def post(self, request):
+        # data = JSONParser().parse(request)
+        # breakpoint()
+        # uidb64 = request.data.get('uidb64')
+        # token = request.data.get('token')
+        # # TODO: Serializer
+        # try:
+        #     uid = force_text(urlsafe_base64_decode(uidb64))
+        #     user = User.objects.get(pk=uid)
+        # except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        #     return HttpResponseBadRequest("No user found with the specified uid")
 
-        try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return HttpResponseBadRequest("No user found with the specified uid")
+        # if not token_generator.check_token(user, token):
+        #     # Figure out expired or invalid in general
+        #     return HttpResponseBadRequest("Invalid activation token")
 
-        if not token_generator.check_token(user, token):
-            # Figure out expired or invalid in general
-            return HttpResponseBadRequest("Invalid activation token")
-
+        # breakpoint()
         data = JSONParser().parse(request)
-        serializer = UserSerializer(data=data)
+        serializer = ActivateUserSerializer(data=data)
         if serializer.is_valid():
-            with transaction.atomic():
-                user.set_password(serializer.validated_data['password1'])
-                user.is_active = True
-                return Response({ 'activated': True}, status=201)
+            serializer.activate_user()
+            # with transaction.atomic():
+                # TODO: serializer save
+                # user.set_password(serializer.validated_data['password1'])
+                # user.is_active = True
+                # user.save()
+            return Response({ 'activated': True}, status=201)
 
         return Response(serializer.errors, status=400)

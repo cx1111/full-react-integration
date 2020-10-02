@@ -3,9 +3,9 @@ Dear {{ name }},
 
 Thanks for registering for an account on {{ domain }}. Please activate your account by clicking the following activation link or by copying and pasting the link into your web browser:
 
-{{ url_prefix }}{% url 'activate_user' uidb64=uidb64 token=token %}
+{{ url_prefix }}/activate/{{ uidb64}}/{{ token }}
 
-This link will expire in 7 days or after the account has been activated.
+This link will expire in {{ expire_days }} days or after the account has been activated.
 
 Regards
 The Mysite Team

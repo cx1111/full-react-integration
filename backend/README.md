@@ -10,12 +10,6 @@ Django project created with Django 3.1
 
 ## Authentication
 
-To create a superuser in Django:
-
-```sh
-python manage.py createsuperuser
-```
-
 DRF auth docs: https://www.django-rest-framework.org/api-guide/authentication/
 
 This application uses the [djangorestframework-simplejwt](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/index.html) package for JWT token authentication. See the [settings docs](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html) for the list of configurable `SIMPLE_JWT` parameters in [settings.py](./mysite/mysite/settings.py).
@@ -23,8 +17,37 @@ This application uses the [djangorestframework-simplejwt](https://django-rest-fr
 The authentication workflow is as follows:
 - Provide a username and password to the login endpoint to receive an access and refresh token
 
+### Registration
 
-### Endpoints
+To create a superuser in Django:
+
+```sh
+python manage.py createsuperuser
+```
+
+To register a user using the API endpoint:
+
+```sh
+curl -X POST -H "Content-Type: application/json" -d '{"username":"<username>","email":"<email>"}' http://127.0.0.1:8000/api/register/
+```
+
+This will create an inactive user, and send a verification link to the email address.
+
+
+To request another verification link:
+
+```sh
+curl -X POST -H "Content-Type: application/json" -d '{"email":"<email>"}' http://127.0.0.1:8000/api/resend-activation/
+```
+
+To verify the account and set the password:
+
+```sh
+curl -X POST -H "Content-Type: application/json" -d '{"token":"<token>","password":"<password>","password2":"<password2>"}' http://127.0.0.1:8000/api/verify-account/
+```
+
+
+### Access Endpoints
 
 To get an access and refresh token:
 
@@ -60,3 +83,8 @@ curl -X POST -H 'Accept: application/json; indent=2' -d refresh=<refreshtoken> h
 https://github.com/SimpleJWT/django-rest-framework-simplejwt/issues/218
 
 https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
+
+
+
+'{"uidb64":"MTU","token":"aay93c-34ed658248e42261ee407a2e984c3f66"}'
+

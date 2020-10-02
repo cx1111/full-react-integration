@@ -72,6 +72,9 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
 }
 
+# 3 days
+PASSWORD_RESET_TIMEOUT = 259200
+RESET_TIMEOUT_DAYS = int(PASSWORD_RESET_TIMEOUT / 86400)
 
 ROOT_URLCONF = 'mysite.urls'
 
@@ -137,6 +140,10 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = 'admin@mysite.com'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
