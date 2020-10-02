@@ -2,6 +2,7 @@
 import React, { FunctionComponent, useState } from "react";
 import Head from "next/head";
 import styled, { ThemeProvider } from "styled-components";
+import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 // import { makeStyles } from "@material-ui/core/styles";
 import {
   AppBar,
@@ -9,27 +10,21 @@ import {
   Toolbar,
   Typography,
   Button,
+  FormControlLabel,
+  Fab
 } from "@material-ui/core";
-import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
+import SwitchUI from "@material-ui/core/Switch";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import MenuIcon from "@material-ui/icons/Menu";
-import { GlobalStyle } from "../styles/GlobalStyle";
-import { getThemeByName } from "../themes/themes";
+import getThemeByName from "../themes/themes";
 
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     flexGrow: 1,
-//   },
-//   menuButton: {
-//     marginRight: theme.spacing(2),
-//   },
-//   title: {
-//     flexGrow: 1,
-//   },
-// }));
-
-// For the fixed navbar
+// Spacer for the fixed navbar
 const PlaceholderDiv = styled.div({ marginBottom: "80px" });
+
+const ThemeSwitcher = styled(FormControlLabel)`
+  position: absolute;
+  right: 0%;
+`;
 
 type LayoutProps = {
   title?: string;
@@ -39,8 +34,21 @@ const Layout: FunctionComponent<LayoutProps> = ({
   title = "React Django App",
   children,
 }) => {
-  const [themeName, _setThemeName] = useState("darkTheme");
-  const theme = getThemeByName(themeName);
+  // TODO This is moderately awkward for a switch-based dual-theme site,
+  // but if we do extend to multiple themes this makes it ready to go
+  const [currentTheme, setTheme] = useState(getThemeByName("lightTheme"));
+  const [currentThemeName, setThemeName] = useState("darkTheme");
+  const isDark = Boolean(currentThemeName === "darkTheme");
+
+  const handleThemeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked } = event.target;
+    if (checked) {
+      setThemeName("darkTheme");
+    } else {
+      setThemeName("lightTheme");
+    }
+    setTheme(getThemeByName(currentThemeName));
+  };
 
   return (
     <>
@@ -55,12 +63,10 @@ const Layout: FunctionComponent<LayoutProps> = ({
         />
       </Head>
 
-      {/* Base global styling */}
-      <MuiThemeProvider theme={theme}>
-        <ThemeProvider theme={theme}>
+      <MuiThemeProvider theme={currentTheme}>
+        <ThemeProvider theme={currentTheme}>
           <CssBaseline />
-          {/* always builds on the material baseline */}
-          <GlobalStyle />
+          // TODO Pull the AppBar into its own component
           <AppBar position="fixed">
             <Toolbar>
               <IconButton edge="start" color="inherit" aria-label="menu">
@@ -68,6 +74,15 @@ const Layout: FunctionComponent<LayoutProps> = ({
               </IconButton>
               <Typography variant="h6">React Django</Typography>
               <Button color="inherit">Login</Button>
+              <ThemeSwitcher
+                control={
+                  <SwitchUI
+                    checked={isDark}
+                    onChange={handleThemeChange}
+                  />
+                }
+                label="Dark Mode"
+        />
             </Toolbar>
           </AppBar>
           <PlaceholderDiv />
