@@ -1,5 +1,5 @@
 // The base layout template for the site
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import Head from "next/head";
 import styled, { ThemeProvider } from "styled-components";
 // import { makeStyles } from "@material-ui/core/styles";
@@ -13,7 +13,8 @@ import {
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import MenuIcon from "@material-ui/icons/Menu";
-import { GlobalStyle, materialTheme, dark, light } from "../styles/GlobalStyle";
+import { GlobalStyle } from "../styles/GlobalStyle";
+import { getThemeByName } from "../themes/themes";
 
 // const useStyles = makeStyles((theme) => ({
 //   root: {
@@ -38,6 +39,9 @@ const Layout: FunctionComponent<LayoutProps> = ({
   title = "React Django App",
   children,
 }) => {
+  const [themeName, _setThemeName] = useState("darkTheme");
+  const theme = getThemeByName(themeName);
+
   return (
     <>
       {/* Specify HTML head fields here */}
@@ -51,10 +55,11 @@ const Layout: FunctionComponent<LayoutProps> = ({
         />
       </Head>
 
-      {/* Base global styling; builds upon material-ui baseline */}
-      <MuiThemeProvider theme={materialTheme}>
-        <ThemeProvider theme={materialTheme}>
+      {/* Base global styling */}
+      <MuiThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
           <CssBaseline />
+          {/* always builds on the material baseline */}
           <GlobalStyle />
           <AppBar position="fixed">
             <Toolbar>
