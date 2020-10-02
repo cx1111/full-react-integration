@@ -14,18 +14,30 @@ export const GlobalStyle = createGlobalStyle({
 
 // Baseline theme instance of material-ui
 export const materialTheme = createMuiTheme({
-  // palette: {
-  //   primary: {
-  //     main: "#556cd6",
-  //   },
-  //   secondary: {
-  //     main: "#19857b",
-  //   },
-  //   error: {
-  //     main: red.A400,
-  //   },
-  //   background: {
-  //     default: "#fff",
-  //   },
-  // },
+  palette: {
+    primary: {
+      main: "#556cd6",
+    },
+    secondary: {
+      main: "#19857b",
+    },
+    error: {
+      main: "#a400",
+    },
+    background: {
+      default: "#fff",
+    },
+  },
+});
+
+export const dark = createMuiTheme({
+  palette: {
+    type: "dark",
+  },
+});
+
+export const light = createMuiTheme({
+  palette: {
+    type: "light",
+  },
 });

@@ -1,7 +1,7 @@
 // The base layout template for the site
 import React, { FunctionComponent } from "react";
 import Head from "next/head";
-import styled from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 // import { makeStyles } from "@material-ui/core/styles";
 import {
   AppBar,
@@ -10,10 +10,10 @@ import {
   Typography,
   Button,
 } from "@material-ui/core";
-import { ThemeProvider } from "@material-ui/core/styles";
+import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import MenuIcon from "@material-ui/icons/Menu";
-import { GlobalStyle, materialTheme } from "../styles/GlobalStyle";
+import { GlobalStyle, materialTheme, dark, light } from "../styles/GlobalStyle";
 
 // const useStyles = makeStyles((theme) => ({
 //   root: {
@@ -52,22 +52,24 @@ const Layout: FunctionComponent<LayoutProps> = ({
       </Head>
       {/* Base global styling */}
 
-      <ThemeProvider theme={materialTheme}>
-        {/* Build upon material-ui baseline */}
-        <CssBaseline />
-        <GlobalStyle />
-        <AppBar position="fixed">
-          <Toolbar>
-            <IconButton edge="start" color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6">React Django</Typography>
-            <Button color="inherit">Login</Button>
-          </Toolbar>
-        </AppBar>
-        <PlaceholderDiv />
-        <>{children}</>
-      </ThemeProvider>
+      <MuiThemeProvider theme={dark}>
+        <ThemeProvider theme={dark}>
+          {/* Build upon material-ui baseline */}
+          <CssBaseline />
+          <GlobalStyle />
+          <AppBar position="fixed">
+            <Toolbar>
+              <IconButton edge="start" color="inherit" aria-label="menu">
+                <MenuIcon />
+              </IconButton>
+              <Typography variant="h6">React Django</Typography>
+              <Button color="inherit">Login</Button>
+            </Toolbar>
+          </AppBar>
+          <PlaceholderDiv />
+          <>{children}</>
+        </ThemeProvider>
+      </MuiThemeProvider>
     </>
   );
 };
