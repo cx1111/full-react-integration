@@ -50,11 +50,10 @@ const Layout: FunctionComponent<LayoutProps> = ({
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
       </Head>
-      {/* Base global styling */}
 
-      <MuiThemeProvider theme={dark}>
-        <ThemeProvider theme={dark}>
-          {/* Build upon material-ui baseline */}
+      {/* Base global styling; builds upon material-ui baseline */}
+      <MuiThemeProvider theme={materialTheme}>
+        <ThemeProvider theme={materialTheme}>
           <CssBaseline />
           <GlobalStyle />
           <AppBar position="fixed">
