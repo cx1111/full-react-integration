@@ -3,7 +3,6 @@ import React, { FunctionComponent, useState } from "react";
 import Head from "next/head";
 import styled, { ThemeProvider } from "styled-components";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
-// import { makeStyles } from "@material-ui/core/styles";
 import {
   AppBar,
   IconButton,
@@ -28,8 +27,9 @@ const Layout: FunctionComponent<LayoutProps> = ({
   title = "React Django App",
   children,
 }) => {
-  // TODO This is moderately awkward for a switch-based dual-theme site,
-  // but if we do extend to multiple themes this makes it ready to go
+  // TODO Move to its own Context?
+  // TODO Save to localStorage so that this persists through refresh
+  // TODO Save to User so that this persists through login/logout
   const [currentTheme, setTheme] = useState(getThemeByName("lightTheme"));
   const [currentThemeName, setThemeName] = useState("darkTheme");
   const isDark = Boolean(currentThemeName === "darkTheme");
@@ -70,13 +70,10 @@ const Layout: FunctionComponent<LayoutProps> = ({
               <Button color="inherit">Login</Button>
               <ThemeSwitcher
                 control={
-                  <SwitchUI
-                    checked={isDark}
-                    onChange={handleThemeChange}
-                  />
+                  <SwitchUI checked={isDark} onChange={handleThemeChange} />
                 }
                 label="Dark Mode"
-        />
+              />
             </Toolbar>
           </AppBar>
           <PlaceholderDiv />
