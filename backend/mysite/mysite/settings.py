@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# Yea but this project ain't going to go into production, m8.
 SECRET_KEY = '3um1#gb6p%0s(smbjv-)hk(ve%(v5k1f^mmds+)!329h!1$p@q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 
     'user',
+    'forum',
 ]
 
 AUTH_USER_MODEL = 'user.User'
@@ -63,6 +65,7 @@ REST_FRAMEWORK = {
         # Enable basic authentication if desired
         # 'rest_framework.authentication.BasicAuthentication',
     ),
+    # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 SIMPLE_JWT = {

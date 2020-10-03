@@ -26,8 +26,6 @@ class HelloView(APIView):
     Public view for everyone
     """
     def get(self, request):
-        print('yes', get_current_site(request))
-        breakpoint()
         content = {'message': 'Hello'}
         return Response(content)
 
