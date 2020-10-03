@@ -10,21 +10,15 @@ import {
   Toolbar,
   Typography,
   Button,
-  FormControlLabel,
-  Fab
 } from "@material-ui/core";
 import SwitchUI from "@material-ui/core/Switch";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import MenuIcon from "@material-ui/icons/Menu";
 import getThemeByName from "../themes/themes";
+import ThemeSwitcher from "./basic/ThemeSwitcher";
 
 // Spacer for the fixed navbar
 const PlaceholderDiv = styled.div({ marginBottom: "80px" });
-
-const ThemeSwitcher = styled(FormControlLabel)`
-  position: absolute;
-  right: 0%;
-`;
 
 type LayoutProps = {
   title?: string;
