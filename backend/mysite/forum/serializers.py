@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import serializers
 
 from forum.models import Post, Comment
@@ -10,27 +12,29 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ('id', 'identifier', 'title', 'author', 'created_at')
         read_only_fields = ('id',)
 
-class CommentReadSerializer(serializers.ModelSerializer):
+
+class CommentSerializer(serializers.ModelSerializer):
     """
     Used for viewing one or multiple comments, including specific info about the author
+
+    And for editing a comment.
     """
     author = UserSerializer(many=False, read_only=True)
 
     class Meta:
         model = Comment
         fields = ('id', 'content', 'parent_comment', 'author', 'created_at', 'edited_at')
-        read_only_fields = ('id', 'created_at', 'author', 'edited_at')
+        read_only_fields = ('id', 'parent_comment', 'author', 'created_at', 'edited_at')
 
-    def create(self, _validated_data):
-        pass
-
-    def update(self, _instance, _validated_data):
-        pass
+    def update(self, instance, validated_data):
+        instance.content = validated_data['content']
+        instance.edited_at = datetime.now()
+        return instance
 
 
 class CommentWriteSerializer(serializers.ModelSerializer):
     """
-    Used for making a comment
+    Used for creating a comment
     """
 
     class Meta:

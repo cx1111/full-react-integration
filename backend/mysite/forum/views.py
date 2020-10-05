@@ -1,14 +1,14 @@
-from django.conf import settings
 from django.http import HttpResponseBadRequest
 
+from rest_framework.generics import GenericAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.parsers import JSONParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
 
 from forum.models import Comment, Post
-from forum.serializers import CommentReadSerializer, CommentWriteSerializer, PostSerializer
+from forum.serializers import CommentSerializer, CommentWriteSerializer, PostSerializer
 
 
 # class PostView(APIView):
@@ -53,7 +53,7 @@ class CommentViewSet(APIView):
         if is_reply is not None:
             comments = comments.filter(is_reply=is_reply)
 
-        serializer = CommentReadSerializer(comments, many=True)
+        serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data, status=200)
 
 
@@ -69,17 +69,91 @@ class CommentRepliesViewSet(APIView):
             return HttpResponseBadRequest("No comment with specified id")
 
         comments = original_comment.replies.all().order_by('created_at')
-        serializer = CommentReadSerializer(comments, many=True)
+        serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data, status=200)
 
 
-class CommentView(APIView):
+# class CommentView(APIView):
+
+#     def get(self, request, comment_id):
+#         data = JSONParser().parse(request)
+#         try:
+#             comment = Comment.objects.get(id=data.get('id'))
+#         except:
+#             return HttpResponseBadRequest("No comment with specified id")
+
+#     def put(self, request, comment_id):
+#         data = JSONParser().parse(request)
+#         try:
+#             comment = Comment.objects.get(id=data.get('id'))
+#         except:
+#             return HttpResponseBadRequest("No comment with specified id")
+
+#         serializer = CommentSerializer(comment, data=data, partial=True)
+#         if serializer.is_valid():
+#             breakpoint()
+#             serializer.save()
+#             return Response(serializer.data, status=200)
+
+#         return Response(serializer.errors, status=400)
+
+class CommentView(RetrieveUpdateDestroyAPIView):
+    serializer_class = CommentSerializer
+
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    # def get_permissions(self):
+    #     """
+    #     Instantiates and returns the list of permissions that this view requires.
+    #     """
+    #     if self.request.method == 'GET':
+    #         permission_classes = [IsAuthenticated]
+    #     else:
+    #         permission_classes = [IsAdmin]
+
+
+    def get_queryset(self):
+        if self.request.method == 'GET':
+            return Comment.objects.all()
+
+        return Comment.objects.filter(author=self.request.user)
+
+    #     breakpoint()
+
+    # def get(self, request, pk):
+    #     breakpoint()
+    #     data = JSONParser().parse(request)
+    #     try:
+    #         comment = Comment.objects.get(pk=pk)
+    #     except:
+    #         return HttpResponseBadRequest("No comment with specified id")
+
+    # def put(self, request, pk):
+    #     data = JSONParser().parse(request)
+    #     try:
+    #         comment = Comment.objects.get(id=data.get('id'))
+    #     except:
+    #         return HttpResponseBadRequest("No comment with specified id")
+
+    #     serializer = CommentSerializer(comment, data=data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=200)
+
+    #     return Response(serializer.errors, status=400)
+
+
+class CreateCommentView(APIView):
     """
     Create a comment
 
     Request params:
-    - content
-    -
+    - content: str
+    - post: int fk
+    - is_reply: bool
+    - parent_comment: int fk, optional
+
+    TODO: Only require either post or parent_comment?
     """
     permission_classes = (IsAuthenticated,)
 
@@ -88,7 +162,6 @@ class CommentView(APIView):
         data['author'] = request.user.id
         serializer = CommentWriteSerializer(data=data)
         if serializer.is_valid():
-            breakpoint()
             serializer.save()
             return Response(serializer.data, status=201)
 

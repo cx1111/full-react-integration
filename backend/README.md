@@ -52,7 +52,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"uidb64":"<uidb64>","token
 To get an access and refresh token:
 
 ```sh
-curl -X POST -H 'Accept: application/json; indent=2' -d username=<username> -d password=<password> http://127.0.0.1:8000/api/token/
+curl -X POST -H 'Accept: application/json; indent=2' -d username=${USERNAME} -d password=${PASSWORD} http://127.0.0.1:8000/api/token/
 ```
 
 The access token is short lived. The renew token is longer lived, with `REFRESH_TOKEN_LIFETIME` set to 2 days so that one can stay logged in for at least a day.
