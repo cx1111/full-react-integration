@@ -7,6 +7,8 @@ from user.serializers import UserSerializer
 
 
 class PostSerializer(serializers.ModelSerializer):
+    author = UserSerializer(many=False, read_only=True)
+
     class Meta:
         model = Post
         fields = ('id', 'identifier', 'title', 'author', 'created_at')
@@ -17,14 +19,14 @@ class CommentSerializer(serializers.ModelSerializer):
     """
     Used for viewing one or multiple comments, including specific info about the author
 
-    And for editing a comment.
+    Also for editing an existing comment.
     """
     author = UserSerializer(many=False, read_only=True)
 
     class Meta:
         model = Comment
-        fields = ('id', 'content', 'parent_comment', 'author', 'created_at', 'edited_at')
-        read_only_fields = ('id', 'parent_comment', 'author', 'created_at', 'edited_at')
+        fields = ('id', 'content', 'post', 'parent_comment', 'author', 'created_at', 'edited_at')
+        read_only_fields = ('id', 'post', 'parent_comment', 'author', 'created_at', 'edited_at')
 
     def update(self, instance, validated_data):
         instance.content = validated_data['content']
@@ -32,7 +34,7 @@ class CommentSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CommentWriteSerializer(serializers.ModelSerializer):
+class CommentCreateSerializer(serializers.ModelSerializer):
     """
     Used for creating a comment
     """

@@ -84,6 +84,42 @@ https://github.com/SimpleJWT/django-rest-framework-simplejwt/issues/218
 
 https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
 
+## Example APIs
 
+The following examples demonstrate the forum app of posts and comments.
 
-'{"uidb64":"MTU","token":"aay93c-34ed658248e42261ee407a2e984c3f66"}'
+View a post:
+
+```sh
+curl -X GET "http://127.0.0.1:8000/api/post/${POST_ID}/comments/"
+```
+
+View a post's top-level comments:
+
+```sh
+curl -X GET "http://127.0.0.1:8000/api/post/${POST_ID}/comments/"
+```
+
+View a comment:
+
+```sh
+curl -X GET "http://127.0.0.1:8000/api/comment/${COMMENT_ID}/"
+```
+
+Edit a comment:
+
+```sh
+curl -X PATCH -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{"content":"${CONTENT}"}' "http://127.0.0.1:8000/api/comment/${COMMENT_ID}/"
+```
+
+Create a comment:
+
+```sh
+curl -X POST -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{"content":"${CONTENT}","post":${POST_ID},"is_reply":false}' "http://127.0.0.1:8000/api/comment/create/"
+```
+
+Reply to a comment:
+
+```sh
+curl -X POST -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{"content":"${CONTENT}","post":${POST_ID},"is_reply":true,"parent_comment":${PARENT_COMMENT_ID}}' "http://127.0.0.1:8000/api/comment/create/"
+```
