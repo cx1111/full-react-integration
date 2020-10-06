@@ -1,6 +1,4 @@
-from django.http import HttpResponseBadRequest
-
-from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -11,10 +9,22 @@ from forum.models import Comment, Post
 from forum.serializers import CommentSerializer, CommentCreateSerializer, PostSerializer
 
 
-class PostView(RetrieveAPIView):
+class PostView(RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
+    # pylint: disable=arguments-differ
+    def delete(self, request, pk):
+        try:
+            post = Post.objects.get(pk=pk)
+        except:
+            return Response({"detail":"No post with specified id"}, status=400)
+
+        if request.user.id != post.author:
+            return Response("Unable to delete another user's post", status=403)
+
+        return Response(status=204)
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -59,7 +69,7 @@ class CommentRepliesViewSet(APIView):
         try:
             original_comment = Comment.objects.get(pk=pk)
         except:
-            return HttpResponseBadRequest("No comment with specified id")
+            return Response({"detail":"No comment with specified id"}, status=400)
 
         comments = original_comment.replies.all().order_by('created_at')
         serializer = CommentSerializer(comments, many=True)
@@ -71,9 +81,8 @@ class CommentView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def put(self, request, *args, **kwargs):
-        # overwrite the default put method
-        return Response({"detail": "Method 'PUT' not allowed."}, status=405)
+    # TODO: delete comment?
+    http_method_names = ('get', 'patch')
 
     # pylint: disable=arguments-differ
     def patch(self, request, pk):
@@ -87,7 +96,7 @@ class CommentView(RetrieveUpdateDestroyAPIView):
         try:
             comment = Comment.objects.get(pk=pk)
         except:
-            return HttpResponseBadRequest("No comment with specified id")
+            return Response({"detail": "No comment with specified id"}, status=400)
 
         if request.user.id != comment.author:
             return Response("Unable to edit another user's comment", status=403)
