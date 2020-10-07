@@ -10,6 +10,9 @@ from forum.serializers import CommentSerializer, CreateCommentSerializer, PostSe
 
 
 class PostView(RetrieveUpdateDestroyAPIView):
+    """
+    View or delete a post
+    """
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -51,7 +54,7 @@ class CreatePostView(APIView):
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Viewset for viewing a set of posts
+    View a set of posts.
 
     Request params:
     - username: str, optional
