@@ -4,7 +4,7 @@ from forum import views
 
 
 urlpatterns = [
-    path('api/create-post/', views.CreateCommentView.as_view(), name='create_post'),
+    path('api/create-post/', views.CreatePostView.as_view(), name='create_post'),
     path('api/post/<pk>/', views.PostView.as_view(), name='post'),
     path('api/posts/', views.PostViewSet.as_view({'get': 'list'}), name='list_posts'),
 

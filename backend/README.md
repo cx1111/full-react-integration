@@ -88,17 +88,28 @@ https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
 
 The following examples demonstrate the forum app of posts and comments.
 
+### Posts
+
 View a post:
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/api/post/${POST_ID}/comments/"
+curl -X GET -H 'Accept: application/json; indent=2' "http://127.0.0.1:8000/api/post/${POST_ID}/"
+```
+
+Create a post:
+
+```sh
+curl -X POST -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d "{\"identifier\":\"$IDENTIFIER\",\"title\":\"${TITLE}\"}" "http://127.0.0.1:8000/api/create-post/"
 ```
 
 View a post's top-level comments:
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/api/post/${POST_ID}/comments/"
+curl -X GET -H 'Accept: application/json; indent=2' "http://127.0.0.1:8000/api/post/${POST_ID}/comments/"
 ```
+
+
+### Comments
 
 View a comment:
 
@@ -109,17 +120,23 @@ curl -X GET "http://127.0.0.1:8000/api/comment/${COMMENT_ID}/"
 Edit a comment:
 
 ```sh
-curl -X PATCH -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{"content":"${CONTENT}"}' "http://127.0.0.1:8000/api/comment/${COMMENT_ID}/"
+curl -X PATCH -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d "{\"content\":\"${CONTENT}\"}" "http://127.0.0.1:8000/api/comment/${COMMENT_ID}/"
 ```
 
 Create a comment:
 
 ```sh
-curl -X POST -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{"content":"${CONTENT}","post":${POST_ID},"is_reply":false}' "http://127.0.0.1:8000/api/comment/create/"
+curl -X POST -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d "{\"content\":\"${CONTENT}\",\"post\":${POST_ID},\"is_reply\":false}" "http://127.0.0.1:8000/api/create-comment/"
 ```
 
 Reply to a comment:
 
 ```sh
-curl -X POST -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d '{"content":"${CONTENT}","post":${POST_ID},"is_reply":true,"parent_comment":${PARENT_COMMENT_ID}}' "http://127.0.0.1:8000/api/comment/create/"
+curl -X POST -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d "{\"content\":\"${CONTENT}\",\"post\":\"${POST_ID}\",\"is_reply\":true,\"parent_comment\":\"${PARENT_COMMENT_ID\"}" "http://127.0.0.1:8000/api/comment/create/"
+```
+
+View a comment's replies:
+
+```sh
+curl -X GET -H 'Accept: application/json; indent=2' "http://127.0.0.1:8000/api/comment/${COMMENT_ID}/replies/"
 ```

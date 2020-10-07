@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import viewsets
 
 from forum.models import Comment, Post
-from forum.serializers import CommentSerializer, CommentCreateSerializer, PostSerializer
+from forum.serializers import CommentSerializer, CreateCommentSerializer, PostSerializer, CreatePostSerializer
 
 
 class PostView(RetrieveUpdateDestroyAPIView):
@@ -18,13 +18,36 @@ class PostView(RetrieveUpdateDestroyAPIView):
     def delete(self, request, pk):
         try:
             post = Post.objects.get(pk=pk)
-        except:
-            return Response({"detail":"No post with specified id"}, status=400)
+        except (ValueError, Post.DoesNotExist):
+            return Response({"detail": "No post with specified id"}, status=400)
 
-        if request.user.id != post.author:
+        if request.user.id != post.author.id:
             return Response("Unable to delete another user's post", status=403)
 
+        post.delete()
         return Response(status=204)
+
+
+class CreatePostView(APIView):
+    """
+    Create a post.
+
+    Request params:
+    - identifier: str
+    - title: str
+
+    """
+
+    def post(self, request):
+        data = JSONParser().parse(request)
+        data['author'] = request.user.id
+        serializer = CreatePostSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+
+        return Response(serializer.errors, status=400)
+
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -47,7 +70,6 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-
 class PostCommentsViewSet(ListAPIView):
     """
     Show top-level comments for a post
@@ -68,8 +90,8 @@ class CommentRepliesViewSet(APIView):
     def get(self, request, pk):
         try:
             original_comment = Comment.objects.get(pk=pk)
-        except:
-            return Response({"detail":"No comment with specified id"}, status=400)
+        except (ValueError, Comment.DoesNotExist):
+            return Response({"detail": "No comment with specified id"}, status=400)
 
         comments = original_comment.replies.all().order_by('created_at')
         serializer = CommentSerializer(comments, many=True)
@@ -95,7 +117,7 @@ class CommentView(RetrieveUpdateDestroyAPIView):
         data = JSONParser().parse(request)
         try:
             comment = Comment.objects.get(pk=pk)
-        except:
+        except (ValueError, Comment.DoesNotExist):
             return Response({"detail": "No comment with specified id"}, status=400)
 
         if request.user.id != comment.author:
@@ -119,10 +141,11 @@ class CreateCommentView(APIView):
     - is_reply: bool
     - parent_comment: int fk, optional
     """
+
     def post(self, request):
         data = JSONParser().parse(request)
         data['author'] = request.user.id
-        serializer = CommentCreateSerializer(data=data)
+        serializer = CreateCommentSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)
