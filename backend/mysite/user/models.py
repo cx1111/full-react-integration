@@ -71,6 +71,20 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
+    # Mandatory attributes for using the admin panel
+    def has_perm(self, _perm, obj=None):
+        "Does the user have a specific permission?"
+        return True
+
+    def has_module_perms(self, _app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        return True
+
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        return self.is_admin
+
 
 class Profile(models.Model):
     """

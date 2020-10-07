@@ -10,7 +10,7 @@ from user.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username',)
 
     def create(self, validated_data):
         """
@@ -52,6 +52,7 @@ class ActivateUserSerializer(serializers.Serializer):
         self.user = user
         return value
 
+    # pylint: disable=arguments-differ
     def validate(self, data):
         if data['password1'] != data['password2']:
             raise serializers.ValidationError("The specified passwords do not match")
@@ -66,3 +67,9 @@ class ActivateUserSerializer(serializers.Serializer):
             self.user.set_password(self.validated_data['password1'])
             self.user.is_active = True
             self.user.save()
+
+    def create(self, _validated_data):
+        pass
+
+    def update(self, _instance, _validated_data):
+        pass

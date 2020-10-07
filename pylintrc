@@ -453,6 +453,7 @@ good-names=ex,
            y,
            z,
            df,
+           pk,
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no
 
