@@ -14,8 +14,9 @@ class API {
   private request: AxiosInstance;
 
   constructor() {
+    console.log(process.env);
     if (!process.env.BACKEND_URL) {
-      throw new Error("'BACKEND_URL' not configured in environment settings");
+      throw new Error(`'BACKEND_URL' not configured in environment settings ${process.env.NODE_ENV}`);
     }
     if (!instance) {
       instance = this;

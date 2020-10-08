@@ -8,29 +8,21 @@ type Post = {
   created_at: Date;
 };
 
-export interface ViewPostParams {
+export type ViewPostParams = {
   identifier: string;
-}
-
-export interface ViewPostResponse extends Post {}
-
-export interface CreatePostParams {
-  identifier: string;
-  title: string;
-}
-
-export interface CreatePostResponse extends Post {}
-
-export interface ListPostsParams {
-  username?: string;
-}
-
-export type ListPostsResponse = Post[]
-
-type Aaa = {
-  a: string;
 };
 
-type Bbb = Aaa[];
+export type ViewPostResponse = Post;
 
-const xx: Bbb = [{ a: "hi" }];
+export type CreatePostParams = {
+  identifier: string;
+  title: string;
+};
+
+export type CreatePostResponse = Post;
+
+export type ListPostsParams = {
+  username?: string;
+};
+
+export type ListPostsResponse = Post[];

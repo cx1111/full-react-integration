@@ -60,13 +60,12 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
     - username: str, optional
     """
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
 
     def get_queryset(self):
         """
-        Optionally filters posts by the `username` query parameter
+        Optionally filters posts by the `username` parameter
         """
-        queryset = Post.objects.all()
+        queryset = Post.objects.all().order_by('created_at')
         username = self.request.query_params.get('username')
         if username is not None:
             queryset = queryset.filter(author__username=username)
@@ -75,7 +74,7 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PostCommentsViewSet(ListAPIView):
     """
-    Show top-level comments for a post
+    Show top-level comments for a post.
 
     """
     serializer_class = CommentSerializer

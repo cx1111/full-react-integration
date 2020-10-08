@@ -18,6 +18,12 @@ export default function Home({}) {
             <a>demo intro page</a>
           </Link>
         </p>
+        <p>
+          Click here to see the{" "}
+          <Link href="/posts" as={`/posts`}>
+            <a>posts</a>
+          </Link>
+        </p>
         <Button variant="contained" color="primary">
           This does nothing
         </Button>
