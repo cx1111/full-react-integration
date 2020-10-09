@@ -15,18 +15,20 @@ export default function Posts({}) {
     };
 
     getPosts();
-  });
+  }, []);
 
   return (
     <Layout>
       <Container maxWidth="lg">
-        <p>Here are all the posts to show</p>
+        <p>All Posts</p>
         {posts.map((p) => {
-          <p>
-            <Link href="/demointro" as={`/demointro`}>
-              <a>{p.title}</a>
-            </Link>
-          </p>;
+          return (
+            <p>
+              <Link href="/demointro" as={`/demointro`}>
+                <a>{p.title}</a>
+              </Link>
+            </p>
+          );
         })}
       </Container>
     </Layout>
