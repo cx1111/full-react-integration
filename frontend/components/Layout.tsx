@@ -77,7 +77,7 @@ const Layout: FunctionComponent<LayoutProps> = ({
                 control={
                   <SwitchUI checked={isDark} onChange={handleThemeChange} />
                 }
-                label="Dark Mode"
+                label="Light Mode"
               />
             </Toolbar>
           </AppBar>
