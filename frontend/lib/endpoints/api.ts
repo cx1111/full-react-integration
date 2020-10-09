@@ -14,18 +14,17 @@ class API {
   private request: AxiosInstance;
 
   constructor() {
-    // if (!process.env.NEXT_PUBLIC_BACKEND_URL) {
-    //   throw new Error(`'NEXT_PUBLIC_BACKEND_URL' not configured in environment settings`);
-    // }
+    if (!process.env.NEXT_PUBLIC_BACKEND_URL) {
+      throw new Error(
+        `'NEXT_PUBLIC_BACKEND_URL' not configured in environment settings`
+      );
+    }
 
-    // Next.js error: https://github.com/vercel/next.js/discussions/12754
-    const url = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000/";
     if (!instance) {
       instance = this;
     }
     this.request = Axios.create({
-      //   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-      baseURL: url,
+      baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
     });
 
     return instance;
