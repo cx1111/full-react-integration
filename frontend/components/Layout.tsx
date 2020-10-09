@@ -2,19 +2,20 @@
 import React, { FunctionComponent, useState } from "react";
 import Head from "next/head";
 import styled, { ThemeProvider } from "styled-components";
-import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import {
   AppBar,
   IconButton,
   Toolbar,
   Typography,
   Button,
+  makeStyles,
+  ThemeProvider as MuiThemeProvider,
 } from "@material-ui/core";
 import SwitchUI from "@material-ui/core/Switch";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
 import MenuIcon from "@material-ui/icons/Menu";
 import getThemeByName from "../themes/themes";
-import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
 
 // Spacer for the fixed navbar
 const PlaceholderDiv = styled.div({ marginBottom: "80px" });
