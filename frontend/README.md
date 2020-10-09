@@ -14,7 +14,7 @@ See `package.json` for the project's configuration, and possible commands. Impor
 
 - `yarn install` - Install node packages.
 - `yarn dev` - Starts the development server.
-- `yarn build` - Builds the app for production.. Compiles src React and Typescript files into js for the browser
+- `yarn build` - Builds the app for production.. Compiles src React and Typescript files into JavaScript for the browser
 - `yarn start` - Runs the built app in production mode.
 
 ## Project Layout

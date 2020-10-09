@@ -4,7 +4,7 @@ Python 3.7+
 
 Django project created with Django 3.1
 
-- Install requirements: `pip install -r requirements`
+- Install requirements: `pip install -r requirements.txt`
 - Start server: `python manage.py runserver`
 - Make and run initial migrations: `python manage.py makemigrations;python manage.py migrate`
 
