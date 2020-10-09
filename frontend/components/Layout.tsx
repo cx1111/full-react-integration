@@ -20,9 +20,17 @@ import getThemeByName from "../themes/themes";
 // Spacer for the fixed navbar
 const PlaceholderDiv = styled.div({ marginBottom: "80px" });
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  title: {
+    flexGrow: 1,
+  },
+}));
+
 const ThemeSwitcher = styled(FormControlLabel)`
-  position: absolute;
-  right: 0%;
+  flexgrow: 1;
 `;
 
 type LayoutProps = {
@@ -33,6 +41,8 @@ const Layout: FunctionComponent<LayoutProps> = ({
   title = "React Django App",
   children,
 }) => {
+  const classes = useStyles();
+
   // TODO Move to its own Context?
   // TODO Save to localStorage so that this persists through refresh
   // TODO Save to User so that this persists through login/logout
@@ -66,20 +76,22 @@ const Layout: FunctionComponent<LayoutProps> = ({
       <MuiThemeProvider theme={currentTheme}>
         <ThemeProvider theme={currentTheme}>
           <CssBaseline />
-          // TODO Pull the AppBar into its own component
-          <AppBar position="fixed">
+          // TODO Pull the AppBar into its own component file
+          <AppBar position="fixed" className={classes.root}>
             <Toolbar>
               <IconButton edge="start" color="inherit" aria-label="menu">
                 <MenuIcon />
               </IconButton>
-              <Typography variant="h6">React Django</Typography>
-              <Button color="inherit">Login</Button>
+              <Typography variant="h6" className={classes.title}>
+                React Django
+              </Typography>
               <ThemeSwitcher
                 control={
                   <SwitchUI checked={isDark} onChange={handleThemeChange} />
                 }
                 label="Light Mode"
               />
+              <Button color="inherit">Login</Button>
             </Toolbar>
           </AppBar>
           <PlaceholderDiv />
