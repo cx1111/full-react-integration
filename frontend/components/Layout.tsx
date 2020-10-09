@@ -10,6 +10,7 @@ import {
   Button,
   makeStyles,
   ThemeProvider as MuiThemeProvider,
+  NoSsr,
 } from "@material-ui/core";
 import SwitchUI from "@material-ui/core/Switch";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -73,31 +74,33 @@ const Layout: FunctionComponent<LayoutProps> = ({
         />
       </Head>
 
-      <MuiThemeProvider theme={currentTheme}>
-        <ThemeProvider theme={currentTheme}>
-          <CssBaseline />
-          // TODO Pull the AppBar into its own component file
-          <AppBar position="fixed" className={classes.root}>
-            <Toolbar>
-              <IconButton edge="start" color="inherit" aria-label="menu">
-                <MenuIcon />
-              </IconButton>
-              <Typography variant="h6" className={classes.title}>
-                React Django
-              </Typography>
-              <ThemeSwitcher
-                control={
-                  <SwitchUI checked={isDark} onChange={handleThemeChange} />
-                }
-                label="Light Mode"
-              />
-              <Button color="inherit">Login</Button>
-            </Toolbar>
-          </AppBar>
-          <PlaceholderDiv />
-          <>{children}</>
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <NoSsr>
+        <MuiThemeProvider theme={currentTheme}>
+          <ThemeProvider theme={currentTheme}>
+            <CssBaseline />
+            {/* TODO Pull the AppBar into its own component file */}
+            <AppBar position="fixed" className={classes.root}>
+              <Toolbar>
+                <IconButton edge="start" color="inherit" aria-label="menu">
+                  <MenuIcon />
+                </IconButton>
+                <Typography variant="h6" className={classes.title}>
+                  React Django
+                </Typography>
+                <ThemeSwitcher
+                  control={
+                    <SwitchUI checked={isDark} onChange={handleThemeChange} />
+                  }
+                  label="Light Mode"
+                />
+                <Button color="inherit">Login</Button>
+              </Toolbar>
+            </AppBar>
+            <PlaceholderDiv />
+            <>{children}</>
+          </ThemeProvider>
+        </MuiThemeProvider>
+      </NoSsr>
     </>
   );
 };
