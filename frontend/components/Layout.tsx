@@ -30,9 +30,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ThemeSwitcher = styled(FormControlLabel)`
-  flexgrow: 1;
-`;
+const ThemeSwitcher = styled(FormControlLabel)``;
 
 type LayoutProps = {
   title?: string;
