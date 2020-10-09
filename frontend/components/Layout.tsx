@@ -1,34 +1,36 @@
 // The base layout template for the site
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import Head from "next/head";
-import styled from "styled-components";
-// import { makeStyles } from "@material-ui/core/styles";
+import styled, { ThemeProvider } from "styled-components";
 import {
   AppBar,
   IconButton,
   Toolbar,
   Typography,
   Button,
+  makeStyles,
+  ThemeProvider as MuiThemeProvider,
+  NoSsr,
 } from "@material-ui/core";
-import { ThemeProvider } from "@material-ui/core/styles";
+import SwitchUI from "@material-ui/core/Switch";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
 import MenuIcon from "@material-ui/icons/Menu";
-import { GlobalStyle, materialTheme } from "../styles/GlobalStyle";
+import getThemeByName from "../themes/themes";
 
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     flexGrow: 1,
-//   },
-//   menuButton: {
-//     marginRight: theme.spacing(2),
-//   },
-//   title: {
-//     flexGrow: 1,
-//   },
-// }));
-
-// For the fixed navbar
+// Spacer for the fixed navbar
 const PlaceholderDiv = styled.div({ marginBottom: "80px" });
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  title: {
+    flexGrow: 1,
+  },
+}));
+
+const ThemeSwitcher = styled(FormControlLabel)``;
 
 type LayoutProps = {
   title?: string;
@@ -38,6 +40,25 @@ const Layout: FunctionComponent<LayoutProps> = ({
   title = "React Django App",
   children,
 }) => {
+  const classes = useStyles();
+
+  // TODO Move to its own Context?
+  // TODO Save to localStorage so that this persists through refresh
+  // TODO Save to User so that this persists through login/logout
+  const [currentTheme, setTheme] = useState(getThemeByName("lightTheme"));
+  const [currentThemeName, setThemeName] = useState("darkTheme");
+  const isDark = Boolean(currentThemeName === "darkTheme");
+
+  const handleThemeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked } = event.target;
+    if (checked) {
+      setThemeName("darkTheme");
+    } else {
+      setThemeName("lightTheme");
+    }
+    setTheme(getThemeByName(currentThemeName));
+  };
+
   return (
     <>
       {/* Specify HTML head fields here */}
@@ -50,24 +71,34 @@ const Layout: FunctionComponent<LayoutProps> = ({
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
       </Head>
-      {/* Base global styling */}
 
-      <ThemeProvider theme={materialTheme}>
-        {/* Build upon material-ui baseline */}
-        <CssBaseline />
-        <GlobalStyle />
-        <AppBar position="fixed">
-          <Toolbar>
-            <IconButton edge="start" color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6">React Django</Typography>
-            <Button color="inherit">Login</Button>
-          </Toolbar>
-        </AppBar>
-        <PlaceholderDiv />
-        <>{children}</>
-      </ThemeProvider>
+      <MuiThemeProvider theme={currentTheme}>
+        <ThemeProvider theme={currentTheme}>
+          <CssBaseline />
+          {/* TODO Pull the AppBar into its own component file */}
+          <NoSsr>
+            <AppBar position="fixed" className={classes.root}>
+              <Toolbar>
+                <IconButton edge="start" color="inherit" aria-label="menu">
+                  <MenuIcon />
+                </IconButton>
+                <Typography variant="h6" className={classes.title}>
+                  React Django
+                </Typography>
+                <ThemeSwitcher
+                  control={
+                    <SwitchUI checked={isDark} onChange={handleThemeChange} />
+                  }
+                  label="Light Mode"
+                />
+                <Button color="inherit">Login</Button>
+              </Toolbar>
+            </AppBar>
+          </NoSsr>
+          <PlaceholderDiv />
+          <>{children}</>
+        </ThemeProvider>
+      </MuiThemeProvider>
     </>
   );
 };
