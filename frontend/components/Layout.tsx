@@ -72,11 +72,11 @@ const Layout: FunctionComponent<LayoutProps> = ({
         />
       </Head>
 
-      <NoSsr>
-        <MuiThemeProvider theme={currentTheme}>
-          <ThemeProvider theme={currentTheme}>
-            <CssBaseline />
-            {/* TODO Pull the AppBar into its own component file */}
+      <MuiThemeProvider theme={currentTheme}>
+        <ThemeProvider theme={currentTheme}>
+          <CssBaseline />
+          {/* TODO Pull the AppBar into its own component file */}
+          <NoSsr>
             <AppBar position="fixed" className={classes.root}>
               <Toolbar>
                 <IconButton edge="start" color="inherit" aria-label="menu">
@@ -94,11 +94,11 @@ const Layout: FunctionComponent<LayoutProps> = ({
                 <Button color="inherit">Login</Button>
               </Toolbar>
             </AppBar>
-            <PlaceholderDiv />
-            <>{children}</>
-          </ThemeProvider>
-        </MuiThemeProvider>
-      </NoSsr>
+          </NoSsr>
+          <PlaceholderDiv />
+          <>{children}</>
+        </ThemeProvider>
+      </MuiThemeProvider>
     </>
   );
 };
