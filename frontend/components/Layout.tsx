@@ -1,6 +1,7 @@
 // The base layout template for the site
 import React, { FunctionComponent, useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import styled, { ThemeProvider } from "styled-components";
 import {
   AppBar,
@@ -82,9 +83,11 @@ const Layout: FunctionComponent<LayoutProps> = ({
                 <IconButton edge="start" color="inherit" aria-label="menu">
                   <MenuIcon />
                 </IconButton>
-                <Typography variant="h6" className={classes.title}>
-                  React Django
-                </Typography>
+                <Link href={"/"}>
+                  <Typography variant="h6" className={classes.title}>
+                    React Django
+                  </Typography>
+                </Link>
                 <ThemeSwitcher
                   control={
                     <SwitchUI checked={isDark} onChange={handleThemeChange} />
