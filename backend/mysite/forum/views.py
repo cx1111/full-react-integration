@@ -71,6 +71,7 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(author__username=username)
         return queryset
 
+
 class PostCommentsViewSet(ListAPIView):
     """
     Show top-level comments for a post.

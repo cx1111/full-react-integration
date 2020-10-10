@@ -37,16 +37,16 @@ export default function Posts({}) {
     <Layout>
       <Container maxWidth="lg">
         <Typography variant={"h1"} component={"h2"}>
-          Posts
+          All Posts
         </Typography>
         {postsLoading && <p>Loading posts...</p>}
         {postsError && <p>Error loading posts: {postsError}</p>}
         {postsData &&
-          postsData.map((p) => {
+          postsData.map((post) => {
             return (
               <p>
-                <Link href="/demointro" as={`/demointro`}>
-                  <a>{p.title}</a>
+                <Link href={`/posts/${post.id}/`}>
+                  <a>{post.title}</a>
                 </Link>
               </p>
             );

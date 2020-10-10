@@ -1,11 +1,10 @@
 import Axios, { AxiosInstance, AxiosPromise } from "axios";
 import {
-  ViewPostParams,
+  ListPostsParams,
+  ListPostsResponse,
   ViewPostResponse,
   CreatePostParams,
   CreatePostResponse,
-  ListPostsParams,
-  ListPostsResponse,
 } from "./forum";
 
 let instance: API;
@@ -29,8 +28,8 @@ class API {
     return instance;
   }
 
-  viewPost = (params: ViewPostParams): AxiosPromise<ViewPostResponse> =>
-    this.request.get(`/api/post/${params.identifier}`);
+  viewPost = (postId: string): AxiosPromise<ViewPostResponse> =>
+    this.request.get(`/api/post/${postId}`);
 
   createPost = (params: CreatePostParams): AxiosPromise<CreatePostResponse> =>
     this.request.post("/api/create-post/", { params });

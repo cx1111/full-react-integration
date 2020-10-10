@@ -8,9 +8,13 @@ type Post = {
   created_at: Date;
 };
 
-export type ViewPostParams = {
-  identifier: string;
+// Request params
+export type ListPostsParams = {
+  username?: string;
 };
+
+// Response data
+export type ListPostsResponse = Post[];
 
 export type ViewPostResponse = Post;
 
@@ -20,9 +24,3 @@ export type CreatePostParams = {
 };
 
 export type CreatePostResponse = Post;
-
-export type ListPostsParams = {
-  username?: string;
-};
-
-export type ListPostsResponse = Post[];
