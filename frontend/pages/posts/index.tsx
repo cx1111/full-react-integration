@@ -41,16 +41,21 @@ export default function Posts({}) {
         </Typography>
         {postsLoading && <p>Loading posts...</p>}
         {postsError && <p>Error loading posts: {postsError}</p>}
-        {postsData &&
-          postsData.map((post) => {
-            return (
-              <p>
-                <Link href={`/posts/${post.id}/`}>
-                  <a>{post.title}</a>
-                </Link>
-              </p>
-            );
-          })}
+        {postsData ? (
+          postsData.length ? (
+            postsData.map((post) => {
+              return (
+                <p>
+                  <Link href={`/posts/${post.id}/`}>
+                    <a>{post.title}</a>
+                  </Link>
+                </p>
+              );
+            })
+          ) : (
+            <p>No posts to show</p>
+          )
+        ) : null}
       </Container>
     </Layout>
   );
