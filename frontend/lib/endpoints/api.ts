@@ -19,7 +19,6 @@ class API {
         `'NEXT_PUBLIC_BACKEND_URL' not configured in environment settings`
       );
     }
-
     if (!instance) {
       instance = this;
     }

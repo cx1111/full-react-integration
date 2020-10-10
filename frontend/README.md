@@ -50,9 +50,8 @@ Run `yarn dev` to start the app and go to the specified localhost URL. Save your
 
 ## Environment Variables
 
-Specify environment variables in the `.env` file if they are non-sensitive, or in `.env.local` if they are. Only variables that begin with `NEXT_PUBLIC_` are accessible by the browser.
+Specify environment variables in the `.env` file if they are non-sensitive, or in `.env.local` if they are. Only variables that begin with `NEXT_PUBLIC_` are accessible by the browser ([ref](https://nextjs.org/docs/basic-features/environment-variables)).
 
-https://nextjs.org/docs/basic-features/environment-variables
 
 ## Template Project
 

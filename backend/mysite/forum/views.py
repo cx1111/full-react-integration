@@ -71,7 +71,6 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(author__username=username)
         return queryset
 
-
 class PostCommentsViewSet(ListAPIView):
     """
     Show top-level comments for a post.
@@ -90,6 +89,7 @@ class CommentRepliesViewSet(APIView):
     """
 
     def get(self, request, pk):
+        # return Response('aeoifjoiaejf', status=500)
         try:
             original_comment = Comment.objects.get(pk=pk)
         except (ValueError, Comment.DoesNotExist):
