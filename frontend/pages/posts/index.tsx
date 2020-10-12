@@ -2,9 +2,8 @@ import React from "react";
 import Layout from "../../components/Layout";
 import Link from "next/link";
 import { Container, Typography } from "@material-ui/core";
-import API from "../../lib/endpoints/api";
 import { useFetch } from "../../hooks/useFetch";
-import { ListPostsResponse } from "../../lib/endpoints/forum";
+import { forumAPI, ListPostsResponse } from "../../lib/endpoints/forum";
 import { parseError } from "../../lib/endpoints/utils";
 
 export default function Posts({}) {
@@ -21,9 +20,7 @@ export default function Posts({}) {
     const getPosts = async () => {
       try {
         setPostsLoading(true);
-        const response = await API.listPosts();
-        const resp2 = await API.viewUser();
-        console.log(resp2);
+        const response = await forumAPI.listPosts();
         setPostsData(response.data);
       } catch (e) {
         setPostsError(parseError(e));

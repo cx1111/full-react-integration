@@ -1,5 +1,5 @@
 import { AxiosPromise } from "axios";
-import { CoreAPI } from "./utils";
+import { API } from "./utils";
 
 type Post = {
   id: string;
@@ -28,13 +28,15 @@ export type CreatePostParams = {
 
 export type CreatePostResponse = Post;
 
-export abstract class ForumAPI extends CoreAPI {
+class ForumAPI {
   viewPost = (postId: string): AxiosPromise<ViewPostResponse> =>
-    this.request.get(`/api/post/${postId}`);
+    API.request.get(`/api/post/${postId}`);
 
   createPost = (params: CreatePostParams): AxiosPromise<CreatePostResponse> =>
-    this.request.post("/api/create-post/", { params });
+    API.request.post("/api/create-post/", { params });
 
   listPosts = (params?: ListPostsParams): AxiosPromise<ListPostsResponse> =>
-    this.request.get("/api/posts/", { params });
+    API.request.get("/api/posts/", { params });
 }
+
+export const forumAPI = new ForumAPI();

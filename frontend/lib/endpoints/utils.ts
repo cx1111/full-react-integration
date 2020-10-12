@@ -1,4 +1,4 @@
-import Axios, { AxiosInstance, AxiosPromise } from "axios";
+import Axios, { AxiosInstance } from "axios";
 
 // Extract an error message from the error object from a failed request
 // https://github.com/axios/axios#handling-errors
@@ -24,9 +24,10 @@ export const parseError = (e?: any): string => {
   return "Something went wrong!";
 };
 
+// Singleton class to instantiate shared axios instance
 let instance: CoreAPI;
 
-export class CoreAPI {
+class CoreAPI {
   request: AxiosInstance;
 
   constructor() {
@@ -41,7 +42,8 @@ export class CoreAPI {
     this.request = Axios.create({
       baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
     });
-    console.log("yooo");
     return instance;
   }
 }
+
+export const API = new CoreAPI();
