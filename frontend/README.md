@@ -48,6 +48,11 @@ If you really need/want to, add a file in `pages/api`.
 
 Run `yarn dev` to start the app and go to the specified localhost URL. Save your source files to update the app in place.
 
+## Environment Variables
+
+Specify environment variables in the `.env` file if they are non-sensitive, or in `.env.local` if they are. Only variables that begin with `NEXT_PUBLIC_` are accessible by the browser ([ref](https://nextjs.org/docs/basic-features/environment-variables)).
+
+
 ## Template Project
 
 This was originally created from a starter template for [Learn Next.js](https://nextjs.org/learn).
