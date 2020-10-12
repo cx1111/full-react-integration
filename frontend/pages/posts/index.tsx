@@ -22,6 +22,8 @@ export default function Posts({}) {
       try {
         setPostsLoading(true);
         const response = await API.listPosts();
+        const resp2 = await API.viewUser();
+        console.log(resp2);
         setPostsData(response.data);
       } catch (e) {
         setPostsError(parseError(e));

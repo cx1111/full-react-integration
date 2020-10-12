@@ -1,3 +1,5 @@
+import Axios, { AxiosInstance, AxiosPromise } from "axios";
+
 // Extract an error message from the error object from a failed request
 // https://github.com/axios/axios#handling-errors
 export const parseError = (e?: any): string => {
@@ -21,3 +23,25 @@ export const parseError = (e?: any): string => {
   }
   return "Something went wrong!";
 };
+
+let instance: CoreAPI;
+
+export class CoreAPI {
+  request: AxiosInstance;
+
+  constructor() {
+    if (!process.env.NEXT_PUBLIC_BACKEND_URL) {
+      throw new Error(
+        `'NEXT_PUBLIC_BACKEND_URL' not configured in environment settings`
+      );
+    }
+    if (!instance) {
+      instance = this;
+    }
+    this.request = Axios.create({
+      baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+    });
+    console.log("yooo");
+    return instance;
+  }
+}
