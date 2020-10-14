@@ -35,7 +35,7 @@ export default function Posts({}) {
   return (
     <Layout>
       <Container maxWidth="lg">
-        <Typography variant={"h1"} component={"h2"}>
+        <Typography variant={"h1"} component={"h1"}>
           All Posts
         </Typography>
         {postsLoading && <p>Loading posts...</p>}
@@ -44,7 +44,7 @@ export default function Posts({}) {
           postsData.length ? (
             postsData.map((post) => {
               return (
-                <p>
+                <p key={post.id}>
                   <Link href={`/posts/${post.id}/`}>
                     <a>{post.title}</a>
                   </Link>
