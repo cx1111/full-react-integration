@@ -6,6 +6,7 @@ import { Container, Typography } from "@material-ui/core";
 import { useFetch } from "../../hooks/useFetch";
 import { forumAPI, ViewPostResponse } from "../../lib/endpoints/forum";
 import { parseError } from "../../lib/endpoints/utils";
+import { displayDate } from "../../lib/utils/date";
 
 export default function Posts({}) {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function Posts({}) {
             </Typography>
             <p>{postData.identifier}</p>
             <p>Author: {postData.author.username}</p>
-            <p>Created At: {postData.created_at}</p>
+            <p>Created At: {displayDate(postData.created_at)}</p>
             <Link href={"/posts"}>Back to Posts</Link>
           </>
         )}

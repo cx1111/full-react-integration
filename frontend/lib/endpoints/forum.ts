@@ -8,7 +8,7 @@ type Post = {
   author: {
     username: string;
   };
-  created_at: Date;
+  created_at: string;
 };
 
 // Request params
