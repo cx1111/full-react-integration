@@ -4,7 +4,11 @@ import Layout from "../../components/Layout";
 import Link from "next/link";
 import { Container, Typography } from "@material-ui/core";
 import { useFetch } from "../../hooks/useFetch";
-import { forumAPI, ViewPostResponse } from "../../lib/endpoints/forum";
+import {
+  forumAPI,
+  ViewPostResponse,
+  ListPostCommentsResponse,
+} from "../../lib/endpoints/forum";
 import { parseError } from "../../lib/endpoints/utils";
 import { displayDate } from "../../lib/utils/date";
 
@@ -18,26 +22,51 @@ export default function Posts({}) {
   const [
     { data: postData, error: postError, loading: postLoading },
     {
-      setData: setpostData,
-      setError: setpostError,
-      setLoading: setpostLoading,
+      setData: setPostData,
+      setError: setPostError,
+      setLoading: setPostLoading,
     },
   ] = useFetch<ViewPostResponse>({ loading: false });
+
+  const [
+    { data: commentsData, error: commentsError, loading: commentsLoading },
+    {
+      setData: setCommentsData,
+      setError: setCommentsError,
+      setLoading: setCommentsLoading,
+    },
+  ] = useFetch<ListPostCommentsResponse>({ loading: false });
 
   React.useEffect(() => {
     const getPosts = async () => {
       try {
-        setpostLoading(true);
+        setPostLoading(true);
         const response = await forumAPI.viewPost(postID);
-        setpostData(response.data);
+        setPostData(response.data);
       } catch (e) {
-        setpostError(parseError(e));
-        setpostData(undefined);
+        setPostError(parseError(e));
+        setPostData(undefined);
       } finally {
-        setpostLoading(false);
+        setPostLoading(false);
       }
     };
     getPosts();
+  }, []);
+
+  React.useEffect(() => {
+    const getComments = async () => {
+      try {
+        setCommentsLoading(true);
+        const response = await forumAPI.listPostComments(postID);
+        setCommentsData(response.data);
+      } catch (e) {
+        setCommentsError(parseError(e));
+        setCommentsData(undefined);
+      } finally {
+        setCommentsLoading(false);
+      }
+    };
+    getComments();
   }, []);
 
   return (
@@ -47,13 +76,28 @@ export default function Posts({}) {
         {postError && <p>Error loading post: {postError}</p>}
         {postData && (
           <>
-            <Typography variant={"h1"} component={"h2"}>
+            <Typography component={"h1"} variant={"h2"}>
               {postData.title}
             </Typography>
-            <p>{postData.identifier}</p>
-            <p>Author: {postData.author.username}</p>
-            <p>Created At: {displayDate(postData.created_at)}</p>
+            <p>Identifier: {postData.identifier}</p>
+            <p>
+              Created by: {postData.author.username} at{" "}
+              {displayDate(postData.created_at)}
+            </p>
             <Link href={"/posts"}>Back to Posts</Link>
+          </>
+        )}
+        <hr />
+        {commentsLoading && <p>Loading comments...</p>}
+        {commentsError && <p>Error loading comments: {commentsError}</p>}
+        {commentsData && (
+          <>
+            {commentsData.map((comment) => (
+              <>
+                <div>{comment.content}</div>
+                <div>{comment.author.username}</div>
+              </>
+            ))}
           </>
         )}
       </Container>
