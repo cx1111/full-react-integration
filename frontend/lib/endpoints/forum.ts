@@ -8,7 +8,19 @@ type Post = {
   author: {
     username: string;
   };
-  created_at: Date;
+  created_at: string;
+};
+
+type Comment = {
+  id: string;
+  content: string;
+  post: string;
+  parent_comment: string | null;
+  author: {
+    username: string;
+  };
+  created_at: string;
+  edited_at: string;
 };
 
 // Request params
@@ -28,6 +40,8 @@ export type CreatePostParams = {
 
 export type CreatePostResponse = Post;
 
+export type ListPostCommentsResponse = Comment[];
+
 class ForumAPI {
   viewPost = (postId: string): AxiosPromise<ViewPostResponse> =>
     API.request.get(`/api/post/${postId}`);
@@ -37,6 +51,9 @@ class ForumAPI {
 
   listPosts = (params?: ListPostsParams): AxiosPromise<ListPostsResponse> =>
     API.request.get("/api/posts/", { params });
+
+  listPostComments = (postId: string): AxiosPromise<ListPostCommentsResponse> =>
+    API.request.get(`/api/post/${postId}/comments/`);
 }
 
 export const forumAPI = new ForumAPI();
