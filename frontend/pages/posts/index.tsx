@@ -1,12 +1,34 @@
 import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
 import Layout from "../../components/Layout";
 import Link from "next/link";
 import { Container, Typography } from "@material-ui/core";
 import { useFetch } from "../../hooks/useFetch";
 import { forumAPI, ListPostsResponse } from "../../lib/endpoints/forum";
 import { parseError } from "../../lib/endpoints/utils";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import { displayDate } from "../../lib/utils/date";
+
+const useStyles = makeStyles({
+  root: {
+    minWidth: 275,
+  },
+  bullet: {
+    display: "inline-block",
+    margin: "0 2px",
+    transform: "scale(0.8)",
+  },
+  title: {
+    fontSize: 14,
+  },
+  pos: {
+    marginBottom: 12,
+  },
+});
 
 export default function Posts({}) {
+  const classes = useStyles();
   const [
     { data: postsData, error: postsError, loading: postsLoading },
     {
@@ -42,15 +64,21 @@ export default function Posts({}) {
         {postsError && <p>Error loading posts: {postsError}</p>}
         {postsData ? (
           postsData.length ? (
-            postsData.map((post) => {
-              return (
-                <p key={post.id}>
+            postsData.map((post) => (
+              <Card className={classes.root} variant="outlined">
+                <CardContent>
                   <Link href={`/posts/${post.id}/`}>
-                    <a>{post.title}</a>
+                    <Typography variant="h5" component="h2">
+                      {post.title}
+                    </Typography>
                   </Link>
-                </p>
-              );
-            })
+                  <Typography className={classes.pos} color="textSecondary">
+                    Posted by {post.author.username} on{" "}
+                    {displayDate(post.created_at)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))
           ) : (
             <p>No posts to show</p>
           )
