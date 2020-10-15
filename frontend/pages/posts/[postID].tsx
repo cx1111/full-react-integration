@@ -1,8 +1,11 @@
 import React from "react";
+import { Container, Typography } from "@material-ui/core";
+import Card from "@material-ui/core/Card";
+import { makeStyles } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import Link from "next/link";
-import { Container, Typography } from "@material-ui/core";
+import CardContent from "@material-ui/core/CardContent";
 import { useFetch } from "../../hooks/useFetch";
 import {
   forumAPI,
@@ -12,9 +15,27 @@ import {
 import { parseError } from "../../lib/endpoints/utils";
 import { displayDate } from "../../lib/utils/date";
 
+const useStyles = makeStyles({
+  root: {
+    minWidth: 275,
+  },
+  bullet: {
+    display: "inline-block",
+    margin: "0 2px",
+    transform: "scale(0.8)",
+  },
+  title: {
+    fontSize: 14,
+  },
+  pos: {
+    marginBottom: 12,
+  },
+});
+
 export default function Posts({}) {
   const router = useRouter();
   const { postID } = router.query;
+  const classes = useStyles();
 
   if (!(typeof postID === "string" && postID.length)) {
     throw new Error("Something went wrong");
@@ -87,16 +108,23 @@ export default function Posts({}) {
             <Link href={"/posts"}>Back to Posts</Link>
           </>
         )}
-        <hr />
         {commentsLoading && <p>Loading comments...</p>}
         {commentsError && <p>Error loading comments: {commentsError}</p>}
         {commentsData && (
           <>
             {commentsData.map((comment) => (
-              <>
-                <div>{comment.content}</div>
-                <div>{comment.author.username}</div>
-              </>
+              <Card className={classes.root}>
+                <CardContent>
+                  <Typography className={classes.pos} color="textSecondary">
+                    {`${comment.author.username} - ${displayDate(
+                      comment.created_at
+                    )}`}
+                  </Typography>
+                  <Typography variant="body2" component="p">
+                    {comment.content}
+                  </Typography>
+                </CardContent>
+              </Card>
             ))}
           </>
         )}
