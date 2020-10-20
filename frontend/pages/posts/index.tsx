@@ -27,7 +27,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Posts({}) {
+const Posts: React.FC = ({}) => {
   const classes = useStyles();
   const [
     { data: postsData, error: postsError, loading: postsLoading },
@@ -52,7 +52,7 @@ export default function Posts({}) {
       }
     };
     getPosts();
-  }, []);
+  }, [setPostsData, setPostsLoading, setPostsError]);
 
   return (
     <Layout>
@@ -65,7 +65,7 @@ export default function Posts({}) {
         {postsData ? (
           postsData.length ? (
             postsData.map((post) => (
-              <Card className={classes.root} variant="outlined">
+              <Card className={classes.root} variant="outlined" key={post.id}>
                 <CardContent>
                   <Link href={`/posts/${post.id}/`}>
                     <Typography variant="h5" component="h2">
@@ -86,4 +86,6 @@ export default function Posts({}) {
       </Container>
     </Layout>
   );
-}
+};
+
+export default Posts;

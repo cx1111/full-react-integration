@@ -32,14 +32,12 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Posts({}) {
+const Posts: React.FC = ({}) => {
   const router = useRouter();
-  const { postID } = router.query;
+  const postID =
+    typeof router.query.postID === "string" ? router.query.postID : "";
   const classes = useStyles();
 
-  if (!(typeof postID === "string" && postID.length)) {
-    throw new Error("Something went wrong");
-  }
   const [
     { data: postData, error: postError, loading: postLoading },
     {
@@ -59,7 +57,11 @@ export default function Posts({}) {
   ] = useFetch<ListPostCommentsResponse>({ loading: false });
 
   React.useEffect(() => {
+    // TODO: 404 page?
     const getPosts = async () => {
+      if (postID === "") {
+        return;
+      }
       try {
         setPostLoading(true);
         const response = await forumAPI.viewPost(postID);
@@ -72,10 +74,13 @@ export default function Posts({}) {
       }
     };
     getPosts();
-  }, []);
+  }, [postID, setPostData, setPostLoading, setPostError]);
 
   React.useEffect(() => {
     const getComments = async () => {
+      if (postID === "") {
+        return;
+      }
       try {
         setCommentsLoading(true);
         const response = await forumAPI.listPostComments(postID);
@@ -88,7 +93,11 @@ export default function Posts({}) {
       }
     };
     getComments();
-  }, []);
+  }, [postID, setCommentsData, setCommentsLoading, setCommentsError]);
+
+  if (postID === "") {
+    return null;
+  }
 
   return (
     <Layout>
@@ -113,7 +122,7 @@ export default function Posts({}) {
         {commentsData && (
           <>
             {commentsData.map((comment) => (
-              <Card className={classes.root}>
+              <Card className={classes.root} key={comment.id}>
                 <CardContent>
                   <Typography className={classes.pos} color="textSecondary">
                     {`${comment.author.username} - ${displayDate(
@@ -131,4 +140,6 @@ export default function Posts({}) {
       </Container>
     </Layout>
   );
-}
+};
+
+export default Posts;
