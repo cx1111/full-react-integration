@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 import Link from "next/link";
 import { Button, Container, Typography } from "@material-ui/core";
 
-export default function Home({}) {
+const Home: React.FC = ({}) => {
   return (
     <Layout>
       <Container maxWidth="lg">
@@ -18,4 +18,6 @@ export default function Home({}) {
       </Container>
     </Layout>
   );
-}
+};
+
+export default Home;
