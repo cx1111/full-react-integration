@@ -3,6 +3,7 @@ import React, { FunctionComponent, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import styled, { ThemeProvider } from "styled-components";
+import { AuthProvider } from "../context/AuthContext";
 import {
   AppBar,
   IconButton,
@@ -22,7 +23,7 @@ import getThemeByName from "../themes/themes";
 // Spacer for the fixed navbar
 const PlaceholderDiv = styled.div({ marginBottom: "80px" });
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((_theme) => ({
   root: {
     flexGrow: 1,
   },
@@ -73,35 +74,39 @@ const Layout: FunctionComponent<LayoutProps> = ({
         />
       </Head>
 
-      <MuiThemeProvider theme={currentTheme}>
-        <ThemeProvider theme={currentTheme}>
-          <CssBaseline />
-          {/* TODO Pull the AppBar into its own component file */}
-          <NoSsr>
-            <AppBar position="fixed" className={classes.root}>
-              <Toolbar>
-                <IconButton edge="start" color="inherit" aria-label="menu">
-                  <MenuIcon />
-                </IconButton>
-                <Link href={"/"}>
-                  <Typography variant="h6" className={classes.title}>
-                    React Django
-                  </Typography>
-                </Link>
-                <ThemeSwitcher
-                  control={
-                    <SwitchUI checked={isDark} onChange={handleThemeChange} />
-                  }
-                  label="Light Mode"
-                />
-                <Button color="inherit">Login</Button>
-              </Toolbar>
-            </AppBar>
-          </NoSsr>
-          <PlaceholderDiv />
-          <>{children}</>
-        </ThemeProvider>
-      </MuiThemeProvider>
+      <AuthProvider>
+        <MuiThemeProvider theme={currentTheme}>
+          <ThemeProvider theme={currentTheme}>
+            <CssBaseline />
+            {/* TODO Pull the AppBar into its own component file */}
+            <NoSsr>
+              <AppBar position="fixed" className={classes.root}>
+                <Toolbar>
+                  <IconButton edge="start" color="inherit" aria-label="menu">
+                    <MenuIcon />
+                  </IconButton>
+                  <Link href={"/"}>
+                    <Typography variant="h6" className={classes.title}>
+                      React Django
+                    </Typography>
+                  </Link>
+                  <ThemeSwitcher
+                    control={
+                      <SwitchUI checked={isDark} onChange={handleThemeChange} />
+                    }
+                    label="Light Mode"
+                  />
+                  <Link href={"/login"}>
+                    <Button color="inherit">Login</Button>
+                  </Link>
+                </Toolbar>
+              </AppBar>
+            </NoSsr>
+            <PlaceholderDiv />
+            <>{children}</>
+          </ThemeProvider>
+        </MuiThemeProvider>
+      </AuthProvider>
     </>
   );
 };
