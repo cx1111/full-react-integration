@@ -56,3 +56,7 @@ Specify environment variables in the `.env` file if they are non-sensitive, or i
 ## Template Project
 
 This was originally created from a starter template for [Learn Next.js](https://nextjs.org/learn).
+
+## Template Themes
+
+- https://material-ui.com/getting-started/templates/
