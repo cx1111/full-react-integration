@@ -21,6 +21,7 @@ const initialProps: AuthProps = {
   //   clearToken: () => {},
 };
 
+// Keys for browser storage
 const ACCESS_TOKEN_KEY = "FRI_ACCESS_TOKEN";
 const REFRESH_TOKEN_KEY = "FRI_REFRESH_TOKEN";
 
