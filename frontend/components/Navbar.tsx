@@ -1,7 +1,7 @@
 // The base layout template for the site
 import React, { FC } from "react";
 import Link from "next/link";
-// import { AuthProvider } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
 import {
   AppBar,
@@ -32,30 +32,38 @@ const NavBar: FC = () => {
     <NoSsr>
       <ThemeContext.Consumer>
         {({ themeName, toggleThemeName }) => (
-          <AppBar position="fixed" className={classes.root}>
-            <Toolbar>
-              <IconButton edge="start" color="inherit" aria-label="menu">
-                <MenuIcon />
-              </IconButton>
-              <Link href={"/"}>
-                <Typography variant="h6" className={classes.title}>
-                  Full React Integration
-                </Typography>
-              </Link>
-              <FormControlLabel
-                control={
-                  <SwitchUI
-                    checked={themeName === "light"}
-                    onChange={toggleThemeName}
+          <AuthContext.Consumer>
+            {({ accessToken }) => (
+              <AppBar position="fixed" className={classes.root}>
+                <Toolbar>
+                  <IconButton edge="start" color="inherit" aria-label="menu">
+                    <MenuIcon />
+                  </IconButton>
+                  <Link href={"/"}>
+                    <Typography variant="h6" className={classes.title}>
+                      Full React Integration
+                    </Typography>
+                  </Link>
+                  <FormControlLabel
+                    control={
+                      <SwitchUI
+                        checked={themeName === "light"}
+                        onChange={toggleThemeName}
+                      />
+                    }
+                    label="Light Mode"
                   />
-                }
-                label="Light Mode"
-              />
-              <Link href={"/login"}>
-                <Button color="inherit">Login</Button>
-              </Link>
-            </Toolbar>
-          </AppBar>
+                  {accessToken ? (
+                    <Button color="inherit">Logout</Button>
+                  ) : (
+                    <Link href={"/login"}>
+                      <Button color="inherit">Login</Button>
+                    </Link>
+                  )}
+                </Toolbar>
+              </AppBar>
+            )}
+          </AuthContext.Consumer>
         )}
       </ThemeContext.Consumer>
     </NoSsr>
