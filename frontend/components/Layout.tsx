@@ -1,9 +1,13 @@
 // The base layout template for the site
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import styled, { ThemeProvider } from "styled-components";
 import { AuthProvider } from "../context/AuthContext";
+import {
+  ThemeProvider as ThemeModeProvider,
+  ThemeContext,
+} from "../context/ThemeContext";
 import {
   AppBar,
   IconButton,
@@ -44,23 +48,6 @@ const Layout: FunctionComponent<LayoutProps> = ({
 }) => {
   const classes = useStyles();
 
-  // TODO Move to its own Context?
-  // TODO Save to localStorage so that this persists through refresh
-  // TODO Save to User so that this persists through login/logout
-  const [currentTheme, setTheme] = useState(getThemeByName("lightTheme"));
-  const [currentThemeName, setThemeName] = useState("darkTheme");
-  const isDark = Boolean(currentThemeName === "darkTheme");
-
-  const handleThemeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked } = event.target;
-    if (checked) {
-      setThemeName("darkTheme");
-    } else {
-      setThemeName("lightTheme");
-    }
-    setTheme(getThemeByName(currentThemeName));
-  };
-
   return (
     <>
       {/* Specify HTML head fields here */}
@@ -75,37 +62,50 @@ const Layout: FunctionComponent<LayoutProps> = ({
       </Head>
 
       <AuthProvider>
-        <MuiThemeProvider theme={currentTheme}>
-          <ThemeProvider theme={currentTheme}>
-            <CssBaseline />
-            {/* TODO Pull the AppBar into its own component file */}
-            <NoSsr>
-              <AppBar position="fixed" className={classes.root}>
-                <Toolbar>
-                  <IconButton edge="start" color="inherit" aria-label="menu">
-                    <MenuIcon />
-                  </IconButton>
-                  <Link href={"/"}>
-                    <Typography variant="h6" className={classes.title}>
-                      React Django
-                    </Typography>
-                  </Link>
-                  <ThemeSwitcher
-                    control={
-                      <SwitchUI checked={isDark} onChange={handleThemeChange} />
-                    }
-                    label="Light Mode"
-                  />
-                  <Link href={"/login"}>
-                    <Button color="inherit">Login</Button>
-                  </Link>
-                </Toolbar>
-              </AppBar>
-            </NoSsr>
-            <PlaceholderDiv />
-            <>{children}</>
-          </ThemeProvider>
-        </MuiThemeProvider>
+        <ThemeModeProvider>
+          <ThemeContext.Consumer>
+            {({ themeName, toggleThemeName }) => (
+              <MuiThemeProvider theme={getThemeByName(themeName)}>
+                <ThemeProvider theme={getThemeByName(themeName)}>
+                  <CssBaseline />
+                  {/* TODO Pull the AppBar into its own component file */}
+                  <NoSsr>
+                    <AppBar position="fixed" className={classes.root}>
+                      <Toolbar>
+                        <IconButton
+                          edge="start"
+                          color="inherit"
+                          aria-label="menu"
+                        >
+                          <MenuIcon />
+                        </IconButton>
+                        <Link href={"/"}>
+                          <Typography variant="h6" className={classes.title}>
+                            React Django
+                          </Typography>
+                        </Link>
+                        <ThemeSwitcher
+                          control={
+                            <SwitchUI
+                              checked={themeName === "dark"}
+                              onChange={toggleThemeName}
+                            />
+                          }
+                          label="Light Mode"
+                        />
+                        <Link href={"/login"}>
+                          <Button color="inherit">Login</Button>
+                        </Link>
+                      </Toolbar>
+                    </AppBar>
+                  </NoSsr>
+                  <PlaceholderDiv />
+                  <>{children}</>
+                </ThemeProvider>
+              </MuiThemeProvider>
+            )}
+          </ThemeContext.Consumer>
+        </ThemeModeProvider>
       </AuthProvider>
     </>
   );

@@ -9,6 +9,6 @@ export default function getThemeByName(theme: string): Theme {
 }
 
 const themeMap: { [key: string]: Theme } = {
-  darkTheme: createMuiTheme({ ...baseTypography, ...darkTheme }),
-  lightTheme: createMuiTheme({ ...baseTypography, ...lightTheme }),
+  dark: createMuiTheme({ ...baseTypography, ...darkTheme }),
+  light: createMuiTheme({ ...baseTypography, ...lightTheme }),
 };
