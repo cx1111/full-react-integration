@@ -3,14 +3,16 @@ import Layout from "../components/Layout";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
+// import FormControlLabel from "@material-ui/core/FormControlLabel";
+// import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import { userAPI } from "../lib/endpoints/user";
+import { AuthContext } from "../context/AuthContext";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -35,6 +37,25 @@ const useStyles = makeStyles((theme) => ({
 const Login: React.FC = ({}) => {
   const classes = useStyles();
 
+  const [username, setUsername] = React.useState<string>("");
+  const [password, setPassword] = React.useState<string>("");
+
+  const attemptLogin = async () => {
+    try {
+      const response = await userAPI.login({
+        username: "aaaa",
+        password: "fuckfuckfuck",
+      });
+      if (response.data && response.data.user) {
+        console.log("success!");
+      }
+    } catch (e) {
+      console.log("failed...");
+    } finally {
+      console.log("finished");
+    }
+  };
+
   return (
     <Layout>
       <Container component="main" maxWidth="xs">
@@ -51,11 +72,12 @@ const Login: React.FC = ({}) => {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="Username"
+              name="username"
               autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <TextField
               variant="outlined"
@@ -67,17 +89,17 @@ const Login: React.FC = ({}) => {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
+              onClick={attemptLogin}
             >
               Sign In
             </Button>
