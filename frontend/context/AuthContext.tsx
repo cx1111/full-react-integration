@@ -31,21 +31,27 @@ const initialProps: AuthProps = {
 const ACCESS_TOKEN_KEY = "FRI_ACCESS_TOKEN";
 const REFRESH_TOKEN_KEY = "FRI_REFRESH_TOKEN";
 
-const FIVE_MINUTES_MS = 300000;
+const TEN_MINUTES_MS = 600000;
 
 export const AuthContext = React.createContext<AuthProps>(initialProps);
 
 AuthContext.displayName = "AuthContext";
 
+const authReducer = (
+  authInfo: AuthInfo,
+  partialauthInfo: Partial<AuthInfo>
+) => ({
+  ...authInfo,
+  ...partialauthInfo,
+});
+
 // Custom provider to implement auth state
 export const AuthProvider: React.FC = ({ children }) => {
-  // TODO: Token refresh endpoint?
-  const [authInfo, setAuthInfo] = React.useState<AuthInfo>(initialProps);
+  const [authInfo, setAuthInfo] = React.useReducer(authReducer, initialProps);
 
-  // Set the authentication info in global context and localstorage
+  // Set the valid authentication info in global context and localstorage
   const setAuth = React.useCallback(
     (authInfo: RequiredAuthInfo) => {
-      console.log("this again?");
       setAuthInfo(authInfo);
       localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, authInfo.refreshToken);
@@ -53,38 +59,41 @@ export const AuthProvider: React.FC = ({ children }) => {
     [setAuthInfo]
   );
 
-  // Clear auth info
+  // Clear auth info from global context and localstorage
   const clearAuthInfo = React.useCallback(() => {
+    const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     setAuthInfo({ accessToken: null, refreshToken: null, user: null });
-    // try {
-    //   authInfo.refreshToken &&
-    //     userAPI.blacklistToken({ refresh: authInfo.refreshToken });
-    // } catch {}
+    try {
+      storedRefreshToken &&
+        userAPI.blacklistToken({ refresh: storedRefreshToken });
+    } catch {}
   }, [setAuthInfo]);
 
-  // Update the refresh and access tokens if authenticated
+  // Update the refresh and access tokens if authenticated.
+  // Avoid using authInfo directly to avoid infinite loop?
   const refreshAuth = React.useCallback(async () => {
-    if (!authInfo.refreshToken || !authInfo.user) {
+    const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!storedRefreshToken) {
       return;
     }
 
     try {
-      jwt.decode(authInfo.refreshToken);
+      jwt.decode(storedRefreshToken);
       const tokenResponse = await userAPI.refreshToken({
-        refresh: authInfo.refreshToken,
+        refresh: storedRefreshToken,
       });
-      setAuth({
+      setAuthInfo({
         accessToken: tokenResponse.data.access,
         refreshToken: tokenResponse.data.refresh,
-        user: authInfo.user,
       });
     } catch {
-      // TODO: condition where refresh API fails due to invalid token or
+      // TODO: deal with condition where refresh API fails due to invalid token or
       // other network error
+      clearAuthInfo(); // this should be conditional
     }
-  }, [authInfo, setAuth]);
+  }, [setAuthInfo, clearAuthInfo]);
 
   React.useEffect(() => {
     // Initialize auth state based on localstorage
@@ -113,14 +122,14 @@ export const AuthProvider: React.FC = ({ children }) => {
           refreshToken: tokenResponse.data.refresh,
           user: userResponse.data.user,
         });
-        console.log("Done this effect");
-        // setInterval(refreshAuth, FIVE_MINUTES_MS);
       } catch {
         // Throws decoding error if invalid or expired
         // Other potential errors when requesting new token set or getting user info
         clearAuthInfo();
         return;
       }
+      const refreshTimer = setInterval(refreshAuth, TEN_MINUTES_MS);
+      return () => clearInterval(refreshTimer);
     };
 
     loadAuth();
