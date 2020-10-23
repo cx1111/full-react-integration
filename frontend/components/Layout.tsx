@@ -2,11 +2,7 @@
 import React, { FunctionComponent } from "react";
 import Head from "next/head";
 import styled, { ThemeProvider } from "styled-components";
-import { AuthProvider } from "../context/AuthContext";
-import {
-  ThemeProvider as ThemeModeProvider,
-  ThemeContext,
-} from "../context/ThemeContext";
+import { ThemeContext } from "../context/ThemeContext";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import getThemeByName from "../themes/themes";
@@ -35,24 +31,19 @@ const Layout: FunctionComponent<LayoutProps> = ({
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
       </Head>
-
-      <AuthProvider>
-        <ThemeModeProvider>
-          <ThemeContext.Consumer>
-            {({ themeName }) => (
-              <MuiThemeProvider theme={getThemeByName(themeName)}>
-                <ThemeProvider theme={getThemeByName(themeName)}>
-                  {/* TODO: remove? */}
-                  <CssBaseline />
-                  <NavBar />
-                  <PlaceholderDiv />
-                  <>{children}</>
-                </ThemeProvider>
-              </MuiThemeProvider>
-            )}
-          </ThemeContext.Consumer>
-        </ThemeModeProvider>
-      </AuthProvider>
+      <ThemeContext.Consumer>
+        {({ themeName }) => (
+          <MuiThemeProvider theme={getThemeByName(themeName)}>
+            <ThemeProvider theme={getThemeByName(themeName)}>
+              {/* TODO: remove? */}
+              <CssBaseline />
+              <NavBar />
+              <PlaceholderDiv />
+              <>{children}</>
+            </ThemeProvider>
+          </MuiThemeProvider>
+        )}
+      </ThemeContext.Consumer>
     </>
   );
 };

@@ -60,3 +60,8 @@ This was originally created from a starter template for [Learn Next.js](https://
 ## Template Themes
 
 - https://material-ui.com/getting-started/templates/
+
+
+## Next.JS Notes
+
+useContext provider: https://stackoverflow.com/questions/57717602/next-js-how-do-i-use-provider-to-wrap-routes-and-use-context-with-hooks

@@ -27,6 +27,10 @@ const Home: React.FC = ({}) => {
                 setAuthInfo({
                   accessToken: "eyaoeifjoiajef",
                   refreshToken: "oajeifoajieofijaoeijfoiej",
+                  user: {
+                    username: "fake",
+                    email: "fake@gmail.com",
+                  },
                 })
               }
             >
