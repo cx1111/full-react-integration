@@ -13,8 +13,11 @@ import {
   NoSsr,
 } from "@material-ui/core";
 import SwitchUI from "@material-ui/core/Switch";
+import AccountCircle from "@material-ui/icons/AccountCircle";
 import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
 import MenuIcon from "@material-ui/icons/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@material-ui/core/Menu";
 
 const useStyles = makeStyles((_theme) => ({
   root: {
@@ -27,6 +30,16 @@ const useStyles = makeStyles((_theme) => ({
 
 const NavBar: FC = () => {
   const classes = useStyles();
+
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <NoSsr>
@@ -54,9 +67,41 @@ const NavBar: FC = () => {
                     label="Light Mode"
                   />
                   {user ? (
-                    <Button color="inherit" onClick={clearAuthInfo}>
-                      Logout
-                    </Button>
+                    <div>
+                      <IconButton
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        onClick={handleMenu}
+                        color="inherit"
+                      >
+                        <AccountCircle />
+                      </IconButton>
+                      <Menu
+                        id="menu-appbar"
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                        anchorPosition={{ top: 1100, left: 100 }}
+                        keepMounted
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                        open={Boolean(anchorEl)}
+                        onClose={handleClose}
+                      >
+                        <Link href="/profile">
+                          <MenuItem>View Profile</MenuItem>
+                        </Link>
+                        <MenuItem onClick={handleClose}>
+                          Manage Account (TBD)
+                        </MenuItem>
+                        <MenuItem onClick={clearAuthInfo}>Sign Out</MenuItem>
+                      </Menu>
+                    </div>
                   ) : (
                     <Link href={"/login"}>
                       <Button color="inherit">Login</Button>

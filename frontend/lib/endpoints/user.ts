@@ -24,6 +24,10 @@ export type RefreshTokenParams = {
   refresh: string;
 };
 
+export type BlacklistTokenResponse = {
+  loggedOut: boolean;
+};
+
 class UserAPI {
   viewUser = (accessToken?: string): AxiosPromise<ViewUserResponse> => {
     if (accessToken) {
@@ -39,6 +43,11 @@ class UserAPI {
 
   refreshToken = (params: RefreshTokenParams): AxiosPromise<GetTokenResponse> =>
     API.request.post("api/token/refresh/", { ...params });
+
+  blacklistToken = (
+    params: RefreshTokenParams
+  ): AxiosPromise<BlacklistTokenResponse> =>
+    API.request.post("api/token/blacklist/", { ...params });
 }
 
 export const userAPI = new UserAPI();
