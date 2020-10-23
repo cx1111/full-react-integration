@@ -37,9 +37,9 @@ export const AuthProvider: React.FC = ({ children }) => {
   const [authInfo, setAuthInfo] = React.useState<AuthInfo>(initialProps);
 
   React.useEffect(() => {
-    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || null;
-    setAuthInfo({ accessToken, refreshToken, user: null });
+    // const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
+    // const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || null;
+    // setAuthInfo({ accessToken, refreshToken, user: null });
   }, []);
 
   // Clear auth info
