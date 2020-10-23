@@ -2,6 +2,7 @@ import Axios, { AxiosInstance } from "axios";
 
 // Extract an error message from the error object from a failed request
 // https://github.com/axios/axios#handling-errors
+// TODO: Expand for non-axios error
 export const parseError = (e?: any): string => {
   if (!e) {
     return "Something went wrong!";
@@ -9,7 +10,13 @@ export const parseError = (e?: any): string => {
   // The request was made and the server responded with a status code
   // that falls out of the range of 2xx
   if (e.response && e.response.data) {
-    return e.response.data.detail || e.response.data;
+    // TODO: array
+    if (typeof e.response.data.detail === "string") {
+      return e.response.data.detail;
+    }
+    if (typeof e.response.data === "string") {
+      return e.response.data;
+    }
   }
   // The request was made but no response was received
   // `error.request` is an instance of XMLHttpRequest in the browser and an instance of

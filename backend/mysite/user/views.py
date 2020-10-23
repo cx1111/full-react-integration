@@ -25,6 +25,7 @@ class HelloView(APIView):
     """
     Public view for everyone
     """
+
     def get(self, request):
         content = {'message': 'Hello'}
         return Response(content)
@@ -45,11 +46,16 @@ class UserInfoView(APIView):
     """
     Returns the username if logged in, else null
     """
+
     def get(self, request):
-        content = {
-            'user': request.user.username or None,
-        }
-        return Response(content)
+        if request.user.is_authenticated:
+            return Response({
+                'user': {
+                    'username': request.user.username,
+                    'email': request.user.email
+                }
+            })
+        return Response({'user': None})
 
 
 class BlacklistTokenView(APIView):
@@ -68,7 +74,7 @@ class BlacklistTokenView(APIView):
         except TokenError as e:
             return HttpResponseBadRequest(str(e))
 
-        return Response({ 'loggedOut': True})
+        return Response({'loggedOut': True})
 
 
 def create_token_info(user: User):
@@ -76,7 +82,7 @@ def create_token_info(user: User):
     Return the encoded base64 uid of the user, and a new activation token
     """
     uidb64 = force_text(urlsafe_base64_encode(force_bytes(
-                    user.pk)))
+        user.pk)))
     token = token_generator.make_token(user)
     return (uidb64, token)
 
@@ -93,9 +99,8 @@ def send_activation_email(request, user: User, uidb64: str, token: str):
     }
     body = loader.render_to_string('user/email/register_email.html', context)
     send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
-        [user.email], fail_silently=False)
+              [user.email], fail_silently=False)
     return
-
 
 
 class RegisterView(APIView):
@@ -137,7 +142,7 @@ class ResendActivationEmailView(APIView):
 
         uidb64, token = create_token_info(user)
         send_activation_email(request, user, uidb64, token)
-        return Response({ 'emailSent': True }, status=200)
+        return Response({'emailSent': True}, status=200)
 
 
 class CheckActivationTokenView(APIView):
@@ -160,7 +165,7 @@ class CheckActivationTokenView(APIView):
             # Figure out expired or invalid in general
             return HttpResponseBadRequest("Invalid activation token")
 
-        return Response({ "valid":True}, status=200)
+        return Response({"valid": True}, status=200)
 
 
 class ActivateUserView(APIView):
@@ -175,6 +180,6 @@ class ActivateUserView(APIView):
         serializer = ActivateUserSerializer(data=data)
         if serializer.is_valid():
             serializer.activate_user()
-            return Response({ 'activated': True}, status=200)
+            return Response({'activated': True}, status=200)
 
         return Response(serializer.errors, status=400)

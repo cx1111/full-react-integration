@@ -1,27 +1,37 @@
 import { AxiosPromise } from "axios";
 import { API } from "./utils";
 
-export type ViewUserResponse = {
-  username: string | null;
+export type User = {
+  username: string;
+  email: string;
 };
 
-export type LoginParams = {
+export type ViewUserResponse = {
+  user: User | null;
+};
+
+export type GetTokenParams = {
   username: string;
   password: string;
 };
 
-export type LoginResponse = {
-  user: { username: string; email: string } | null;
-  accessToken: string;
-  refreshToken: string;
+export type GetTokenResponse = {
+  access: string;
+  refresh: string;
 };
 
 class UserAPI {
-  viewUser = (): AxiosPromise<ViewUserResponse> =>
-    API.request.get(`/api/user/`);
+  viewUser = (accessToken?: string): AxiosPromise<ViewUserResponse> => {
+    if (accessToken) {
+      return API.request.get("/api/user/", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+    }
+    return API.request.get("/api/user/");
+  };
 
-  login = (params: LoginParams): AxiosPromise<LoginResponse> =>
-    API.request.post(`/api/login/`, { params });
+  getToken = (params: GetTokenParams): AxiosPromise<GetTokenResponse> =>
+    API.request.post("/api/token/", { ...params });
 }
 
 export const userAPI = new UserAPI();

@@ -3,8 +3,6 @@ import Layout from "../components/Layout";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
-// import FormControlLabel from "@material-ui/core/FormControlLabel";
-// import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
@@ -13,6 +11,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { userAPI } from "../lib/endpoints/user";
 import { AuthContext } from "../context/AuthContext";
+import { useFetch } from "../hooks/useFetch";
+import { parseError } from "../lib/endpoints/utils";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -40,84 +40,110 @@ const Login: React.FC = ({}) => {
   const [username, setUsername] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
 
-  const attemptLogin = async () => {
-    try {
-      const response = await userAPI.login({
-        username: "aaaa",
-        password: "fuckfuckfuck",
-      });
-      if (response.data && response.data.user) {
-        console.log("success!");
-      }
-    } catch (e) {
-      console.log("failed...");
-    } finally {
-      console.log("finished");
-    }
-  };
+  const [
+    { error: loginError, loading: loginLoading },
+    { setError: setLoginError, setLoading: setLoginLoading },
+  ] = useFetch<any>({ loading: false });
 
   return (
     <Layout>
-      <Container component="main" maxWidth="xs">
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
-          </Typography>
-          <form className={classes.form} noValidate>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+      <AuthContext.Consumer>
+        {({ setAuthInfo }) => {
+          const attemptLogin = async () => {
+            try {
+              setLoginLoading(true);
+              setLoginError("");
+              const tokenResponse = await userAPI.getToken({
+                username,
+                password,
+              });
+              const userResponse = await userAPI.viewUser(
+                tokenResponse.data.access
+              );
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              onClick={attemptLogin}
-            >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
-            </Grid>
-          </form>
-        </div>
-      </Container>
+              // Shows null user. Should never happen.
+              if (!userResponse.data.user) {
+                throw new Error("Something went wrong");
+              }
+              setAuthInfo({
+                accessToken: tokenResponse.data.access,
+                refreshToken: tokenResponse.data.refresh,
+                user: {
+                  username: userResponse.data.user.username,
+                  email: userResponse.data.user.email,
+                },
+              });
+            } catch (e) {
+              setLoginError(parseError(e));
+            } finally {
+              setLoginLoading(false);
+            }
+          };
+
+          return (
+            <Container component="main" maxWidth="xs">
+              <div className={classes.paper}>
+                <Avatar className={classes.avatar}>
+                  <LockOutlinedIcon />
+                </Avatar>
+                <Typography component="h1" variant="h5">
+                  Sign in
+                </Typography>
+                <form className={classes.form} noValidate>
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    name="username"
+                    autoFocus
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {loginError && <p>Error logging in: {loginError}</p>}
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                    onClick={attemptLogin}
+                    disabled={loginLoading}
+                  >
+                    Sign In
+                  </Button>
+                  <Grid container>
+                    <Grid item xs>
+                      <Link href="#" variant="body2">
+                        Forgot password?
+                      </Link>
+                    </Grid>
+                    <Grid item>
+                      <Link href="#" variant="body2">
+                        {"Create Account"}
+                      </Link>
+                    </Grid>
+                  </Grid>
+                </form>
+              </div>
+            </Container>
+          );
+        }}
+      </AuthContext.Consumer>
     </Layout>
   );
 };

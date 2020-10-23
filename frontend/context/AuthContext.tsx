@@ -1,9 +1,11 @@
 import React from "react";
+import { User } from "../lib/endpoints/user";
 
 // Actual auth data
 interface AuthInfo {
   accessToken: string | null;
   refreshToken: string | null;
+  user: User | null;
 }
 
 // Auth data and callbacks
@@ -15,6 +17,7 @@ interface AuthProps extends AuthInfo {
 const initialProps: AuthProps = {
   accessToken: null,
   refreshToken: null,
+  user: null,
   setAuthInfo: (_authInfo) => {},
   clearAuthInfo: () => {},
   //   setToken: (_token: string) => {},
@@ -36,7 +39,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   React.useEffect(() => {
     const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || null;
-    setAuthInfo({ accessToken, refreshToken });
+    setAuthInfo({ accessToken, refreshToken, user: null });
   }, []);
 
   // Clear auth info
@@ -44,7 +47,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     // TODO: blacklist refresh token
     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    setAuthInfo({ accessToken: null, refreshToken: null });
+    setAuthInfo({ accessToken: null, refreshToken: null, user: null });
   };
 
   //   const setToken = (accessToken: string) => {
