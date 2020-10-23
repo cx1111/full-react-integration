@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "../lib/endpoints/user";
+import { User, userAPI } from "../lib/endpoints/user";
 
 // Actual auth data
 interface AuthInfo {
@@ -8,9 +8,13 @@ interface AuthInfo {
   user: User | null;
 }
 
+type RequiredAuthInfo = {
+  [K in keyof AuthInfo]: NonNullable<AuthInfo[K]>;
+};
+
 // Auth data and callbacks
 interface AuthProps extends AuthInfo {
-  setAuthInfo: (authInfo: AuthInfo) => void;
+  setAuthInfo: (authInfo: RequiredAuthInfo) => void;
   clearAuthInfo: () => void;
 }
 
@@ -34,13 +38,15 @@ AuthContext.displayName = "AuthContext";
 
 // Custom provider to implement auth state
 export const AuthProvider: React.FC = ({ children }) => {
+  // TODO: Token refresh endpoint?
   const [authInfo, setAuthInfo] = React.useState<AuthInfo>(initialProps);
 
-  React.useEffect(() => {
-    // const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
-    // const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || null;
-    // setAuthInfo({ accessToken, refreshToken, user: null });
-  }, []);
+  // Set the authentication info in global context and localstorage
+  const setAuth = (authInfo: RequiredAuthInfo) => {
+    setAuthInfo(authInfo);
+    localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.accessToken);
+    localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.refreshToken);
+  };
 
   // Clear auth info
   const clearAuthInfo = () => {
@@ -50,16 +56,19 @@ export const AuthProvider: React.FC = ({ children }) => {
     setAuthInfo({ accessToken: null, refreshToken: null, user: null });
   };
 
-  //   const setToken = (accessToken: string) => {
-  //     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-  //     setAccessToken(accessToken);
-  //   };
-  //   const clearToken = () => {
-  //     localStorage.removeItem(ACCESS_TOKEN_KEY);
-  //     setAccessToken("");
-  //   };
-  //   const value = { accessToken, setToken, clearToken };
-  const value = { ...authInfo, setAuthInfo, clearAuthInfo };
+  React.useEffect(() => {
+    const loadAuth = async () => {
+      const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || null;
+      // TODO: Check if still valid
+
+      // const refreshData = deco
+
+      // setAuth({ accessToken, refreshToken, user: null });
+    };
+  }, []);
+
+  const value = { ...authInfo, setAuthInfo: setAuth, clearAuthInfo };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
