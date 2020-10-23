@@ -93,9 +93,11 @@ const NavBar: FC = () => {
                         open={Boolean(anchorEl)}
                         onClose={handleClose}
                       >
-                        <MenuItem onClick={handleClose}>View Profile</MenuItem>
+                        <Link href="/profile">
+                          <MenuItem>View Profile</MenuItem>
+                        </Link>
                         <MenuItem onClick={handleClose}>
-                          Manage Account
+                          Manage Account (TBD)
                         </MenuItem>
                         <MenuItem onClick={clearAuthInfo}>Sign Out</MenuItem>
                       </Menu>
