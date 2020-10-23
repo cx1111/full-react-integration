@@ -75,7 +75,7 @@ There is no provided endpoint to blacklist an access token, which are to expire 
 To use the refresh token to get another access and refresh token:
 
 ```sh
-curl -X POST -H 'Accept: application/json; indent=2' -d refresh=<refreshtoken> http://127.0.0.1:8000/api/token/refresh/
+curl -X POST -H 'Accept: application/json; indent=2' -d refresh=$REFRESHTOKEN http://127.0.0.1:8000/api/token/refresh/
 ```
 
 `ROTATE_REFRESH_TOKENS` is set to True so that one can stay logged in indefinitely as long as they are active. `BLACKLIST_AFTER_ROTATION` is set to False because a new access/refresh token has to be retrieved every time the short-lived access token expires. If every refresh token were blacklisted this frequently, there would be far too many in the blacklist to check.

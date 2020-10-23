@@ -31,6 +31,8 @@ const initialProps: AuthProps = {
 const ACCESS_TOKEN_KEY = "FRI_ACCESS_TOKEN";
 const REFRESH_TOKEN_KEY = "FRI_REFRESH_TOKEN";
 
+const FIVE_MINUTES_MS = 300000;
+
 export const AuthContext = React.createContext<AuthProps>(initialProps);
 
 AuthContext.displayName = "AuthContext";
@@ -41,35 +43,61 @@ export const AuthProvider: React.FC = ({ children }) => {
   const [authInfo, setAuthInfo] = React.useState<AuthInfo>(initialProps);
 
   // Set the authentication info in global context and localstorage
-  const setAuth = (authInfo: RequiredAuthInfo) => {
-    setAuthInfo(authInfo);
-    localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, authInfo.refreshToken);
-  };
+  const setAuth = React.useCallback(
+    (authInfo: RequiredAuthInfo) => {
+      console.log("this again?");
+      setAuthInfo(authInfo);
+      localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, authInfo.refreshToken);
+    },
+    [setAuthInfo]
+  );
 
   // Clear auth info
-  const clearAuthInfo = () => {
+  const clearAuthInfo = React.useCallback(() => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
-    // TODO: blacklist refresh token
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     setAuthInfo({ accessToken: null, refreshToken: null, user: null });
-  };
+    // try {
+    //   authInfo.refreshToken &&
+    //     userAPI.blacklistToken({ refresh: authInfo.refreshToken });
+    // } catch {}
+  }, [setAuthInfo]);
+
+  // Update the refresh and access tokens if authenticated
+  const refreshAuth = React.useCallback(async () => {
+    if (!authInfo.refreshToken || !authInfo.user) {
+      return;
+    }
+
+    try {
+      jwt.decode(authInfo.refreshToken);
+      const tokenResponse = await userAPI.refreshToken({
+        refresh: authInfo.refreshToken,
+      });
+      setAuth({
+        accessToken: tokenResponse.data.access,
+        refreshToken: tokenResponse.data.refresh,
+        user: authInfo.user,
+      });
+    } catch {
+      // TODO: condition where refresh API fails due to invalid token or
+      // other network error
+    }
+  }, [authInfo, setAuth]);
 
   React.useEffect(() => {
-    console.log("Something happening");
+    // Initialize auth state based on localstorage
     const loadAuth = async () => {
       const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
       const storedRefreshToken =
         localStorage.getItem(REFRESH_TOKEN_KEY) || null;
 
       if (!storedAccessToken || !storedRefreshToken) {
-        clearAuthInfo();
         return;
       }
-      console.log("one");
 
       try {
-        console.log("two");
         jwt.decode(storedRefreshToken);
         // If the refresh token is valid, load a new set of tokens to extend auth time
         const tokenResponse = await userAPI.refreshToken({
@@ -85,6 +113,8 @@ export const AuthProvider: React.FC = ({ children }) => {
           refreshToken: tokenResponse.data.refresh,
           user: userResponse.data.user,
         });
+        console.log("Done this effect");
+        // setInterval(refreshAuth, FIVE_MINUTES_MS);
       } catch {
         // Throws decoding error if invalid or expired
         // Other potential errors when requesting new token set or getting user info
@@ -94,7 +124,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     };
 
     loadAuth();
-  }, []);
+  }, [setAuth, clearAuthInfo, refreshAuth]);
 
   const value = { ...authInfo, setAuthInfo: setAuth, clearAuthInfo };
 
