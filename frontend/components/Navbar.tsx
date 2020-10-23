@@ -33,7 +33,7 @@ const NavBar: FC = () => {
       <ThemeContext.Consumer>
         {({ themeName, toggleThemeName }) => (
           <AuthContext.Consumer>
-            {({ accessToken }) => (
+            {({ user, clearAuthInfo }) => (
               <AppBar position="fixed" className={classes.root}>
                 <Toolbar>
                   <IconButton edge="start" color="inherit" aria-label="menu">
@@ -53,8 +53,10 @@ const NavBar: FC = () => {
                     }
                     label="Light Mode"
                   />
-                  {accessToken ? (
-                    <Button color="inherit">Logout</Button>
+                  {user ? (
+                    <Button color="inherit" onClick={clearAuthInfo}>
+                      Logout
+                    </Button>
                   ) : (
                     <Link href={"/login"}>
                       <Button color="inherit">Login</Button>

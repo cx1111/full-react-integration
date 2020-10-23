@@ -20,6 +20,10 @@ export type GetTokenResponse = {
   refresh: string;
 };
 
+export type RefreshTokenParams = {
+  refresh: string;
+};
+
 class UserAPI {
   viewUser = (accessToken?: string): AxiosPromise<ViewUserResponse> => {
     if (accessToken) {
@@ -32,6 +36,9 @@ class UserAPI {
 
   getToken = (params: GetTokenParams): AxiosPromise<GetTokenResponse> =>
     API.request.post("/api/token/", { ...params });
+
+  refreshToken = (params: RefreshTokenParams): AxiosPromise<GetTokenResponse> =>
+    API.request.post("api/token/refresh/", { ...params });
 }
 
 export const userAPI = new UserAPI();

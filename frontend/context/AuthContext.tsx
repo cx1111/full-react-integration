@@ -1,4 +1,5 @@
 import React from "react";
+import jwt from "jsonwebtoken";
 import { User, userAPI } from "../lib/endpoints/user";
 
 // Actual auth data
@@ -24,8 +25,6 @@ const initialProps: AuthProps = {
   user: null,
   setAuthInfo: (_authInfo) => {},
   clearAuthInfo: () => {},
-  //   setToken: (_token: string) => {},
-  //   clearToken: () => {},
 };
 
 // Keys for browser storage
@@ -45,7 +44,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   const setAuth = (authInfo: RequiredAuthInfo) => {
     setAuthInfo(authInfo);
     localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.accessToken);
-    localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.refreshToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, authInfo.refreshToken);
   };
 
   // Clear auth info
@@ -57,23 +56,47 @@ export const AuthProvider: React.FC = ({ children }) => {
   };
 
   React.useEffect(() => {
+    console.log("Something happening");
     const loadAuth = async () => {
-      const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
-      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || null;
-      // TODO: Check if still valid
+      const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
+      const storedRefreshToken =
+        localStorage.getItem(REFRESH_TOKEN_KEY) || null;
 
-      // const refreshData = deco
+      if (!storedAccessToken || !storedRefreshToken) {
+        clearAuthInfo();
+        return;
+      }
+      console.log("one");
 
-      // setAuth({ accessToken, refreshToken, user: null });
+      try {
+        console.log("two");
+        jwt.decode(storedRefreshToken);
+        // If the refresh token is valid, load a new set of tokens to extend auth time
+        const tokenResponse = await userAPI.refreshToken({
+          refresh: storedRefreshToken,
+        });
+        const userResponse = await userAPI.viewUser(tokenResponse.data.access);
+
+        if (!userResponse.data.user) {
+          throw new Error("Failed to get user");
+        }
+        setAuth({
+          accessToken: tokenResponse.data.access,
+          refreshToken: tokenResponse.data.refresh,
+          user: userResponse.data.user,
+        });
+      } catch {
+        // Throws decoding error if invalid or expired
+        // Other potential errors when requesting new token set or getting user info
+        clearAuthInfo();
+        return;
+      }
     };
+
+    loadAuth();
   }, []);
 
   const value = { ...authInfo, setAuthInfo: setAuth, clearAuthInfo };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-// export const useLoginState = (): boolean => {
-//   const { accessToken } = React.useContext(AuthContext);
-//   return !!accessToken;
-// };
