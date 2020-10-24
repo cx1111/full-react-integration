@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
@@ -35,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Login: React.FC = ({}) => {
   const classes = useStyles();
+  const router = useRouter();
 
   const [username, setUsername] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
@@ -72,6 +74,7 @@ const Login: React.FC = ({}) => {
                   email: userResponse.data.user.email,
                 },
               });
+              router.push("/");
             } catch (e) {
               setLoginError(parseError(e));
             } finally {

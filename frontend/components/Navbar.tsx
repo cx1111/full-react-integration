@@ -1,6 +1,7 @@
 // The base layout template for the site
 import React, { FC } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
 import {
@@ -30,6 +31,7 @@ const useStyles = makeStyles((_theme) => ({
 
 const NavBar: FC = () => {
   const classes = useStyles();
+  const router = useRouter();
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
@@ -99,12 +101,19 @@ const NavBar: FC = () => {
                         <MenuItem onClick={handleClose}>
                           Manage Account (TBD)
                         </MenuItem>
-                        <MenuItem onClick={clearAuthInfo}>Sign Out</MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            clearAuthInfo();
+                            router.push("/");
+                          }}
+                        >
+                          Log Out
+                        </MenuItem>
                       </Menu>
                     </div>
                   ) : (
                     <Link href={"/login"}>
-                      <Button color="inherit">Login</Button>
+                      <Button color="inherit">Log In</Button>
                     </Link>
                   )}
                 </Toolbar>
