@@ -15,14 +15,20 @@ type RequiredAuthInfo = {
 
 // Auth data and callbacks
 interface AuthProps extends AuthInfo {
+  authLoading: boolean;
   setAuthInfo: (authInfo: RequiredAuthInfo) => void;
   clearAuthInfo: () => void;
 }
 
-const initialProps: AuthProps = {
+const initialInfo: AuthInfo = {
   accessToken: null,
   refreshToken: null,
   user: null,
+};
+
+const initialProps: AuthProps = {
+  ...initialInfo,
+  authLoading: true,
   setAuthInfo: (_authInfo) => {},
   clearAuthInfo: () => {},
 };
@@ -47,7 +53,8 @@ const authReducer = (
 
 // Custom provider to implement auth state
 export const AuthProvider: React.FC = ({ children }) => {
-  const [authInfo, setAuthInfo] = React.useReducer(authReducer, initialProps);
+  const [authInfo, setAuthInfo] = React.useReducer(authReducer, initialInfo);
+  const [authLoading, setAuthLoading] = React.useState<boolean>(false);
 
   // Set the valid authentication info in global context and localstorage
   const setAuth = React.useCallback(
@@ -106,7 +113,10 @@ export const AuthProvider: React.FC = ({ children }) => {
         return;
       }
 
+      let refreshTimer: number | undefined;
+      // Process the auth info from localstorage if present
       try {
+        setAuthLoading(true);
         jwt.decode(storedRefreshToken);
         // If the refresh token is valid, load a new set of tokens to extend auth time
         const tokenResponse = await userAPI.refreshToken({
@@ -122,20 +132,39 @@ export const AuthProvider: React.FC = ({ children }) => {
           refreshToken: tokenResponse.data.refresh,
           user: userResponse.data.user,
         });
+        refreshTimer = setInterval(refreshAuth, TEN_MINUTES_MS);
       } catch {
         // Throws decoding error if invalid or expired
         // Other potential errors when requesting new token set or getting user info
         clearAuthInfo();
-        return;
+      } finally {
+        setAuthLoading(false);
       }
-      const refreshTimer = setInterval(refreshAuth, TEN_MINUTES_MS);
-      return () => clearInterval(refreshTimer);
+
+      if (typeof refreshTimer === "number") {
+        return () => clearInterval(refreshTimer);
+      }
     };
 
     loadAuth();
   }, [setAuth, clearAuthInfo, refreshAuth]);
 
-  const value = { ...authInfo, setAuthInfo: setAuth, clearAuthInfo };
+  const value: AuthProps = {
+    ...authInfo,
+    authLoading,
+    setAuthInfo: setAuth,
+    clearAuthInfo,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({
+  children,
+}) => {
+  const { user, authLoading } = React.useContext(AuthContext);
+  if (authLoading || (!user && window.location.pathname !== "/login")) {
+    return <div>Wait...</div>;
+  }
+  return children;
 };

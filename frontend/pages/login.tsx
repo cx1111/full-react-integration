@@ -120,10 +120,14 @@ const Login: React.FC = ({}) => {
                   {loginError && <p>Error logging in: {loginError}</p>}
                   <Button
                     fullWidth
+                    type="submit"
                     variant="contained"
                     color="primary"
                     className={classes.submit}
-                    onClick={attemptLogin}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      attemptLogin();
+                    }}
                     disabled={loginLoading}
                   >
                     Sign In

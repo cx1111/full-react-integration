@@ -59,6 +59,10 @@ const NavBar: FC = () => {
                       Full React Integration
                     </Typography>
                   </Link>
+                  <Link href={"/about"}>
+                    <Button color="inherit">About</Button>
+                  </Link>
+
                   <FormControlLabel
                     control={
                       <SwitchUI
