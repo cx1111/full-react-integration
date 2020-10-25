@@ -7,16 +7,24 @@ interface AuthInfo {
   accessToken: string | null;
   refreshToken: string | null;
   user: User | null;
+  // Loading param here instead of AuthProps to ensure status is updated
+  // with main info, due to async and batched hook updates
+  authLoading: boolean;
 }
 
-type RequiredAuthInfo = {
-  [K in keyof AuthInfo]: NonNullable<AuthInfo[K]>;
-};
+// type RequiredAuthInfo = {
+//   [K in keyof AuthInfo]: NonNullable<AuthInfo[K]>;
+// };
+
+interface PresentAuthInfo {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
 
 // Auth data and callbacks
 interface AuthProps extends AuthInfo {
-  authLoading: boolean;
-  setAuthInfo: (authInfo: RequiredAuthInfo) => void;
+  setAuthInfo: (authInfo: PresentAuthInfo) => void;
   clearAuthInfo: () => void;
 }
 
@@ -24,11 +32,11 @@ const initialInfo: AuthInfo = {
   accessToken: null,
   refreshToken: null,
   user: null,
+  authLoading: true,
 };
 
 const initialProps: AuthProps = {
   ...initialInfo,
-  authLoading: true,
   setAuthInfo: (_authInfo) => {},
   clearAuthInfo: () => {},
 };
@@ -54,12 +62,11 @@ const authReducer = (
 // Custom provider to implement auth state
 export const AuthProvider: React.FC = ({ children }) => {
   const [authInfo, setAuthInfo] = React.useReducer(authReducer, initialInfo);
-  const [authLoading, setAuthLoading] = React.useState<boolean>(true);
 
   // Set the valid authentication info in global context and localstorage
   const setAuth = React.useCallback(
-    (authInfo: RequiredAuthInfo) => {
-      setAuthInfo(authInfo);
+    (authInfo: PresentAuthInfo) => {
+      setAuthInfo({ ...authInfo, authLoading: false });
       localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, authInfo.refreshToken);
     },
@@ -71,7 +78,12 @@ export const AuthProvider: React.FC = ({ children }) => {
     const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    setAuthInfo({ accessToken: null, refreshToken: null, user: null });
+    setAuthInfo({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+      authLoading: false,
+    });
     try {
       storedRefreshToken &&
         userAPI.blacklistToken({ refresh: storedRefreshToken });
@@ -91,27 +103,32 @@ export const AuthProvider: React.FC = ({ children }) => {
       const tokenResponse = await userAPI.refreshToken({
         refresh: storedRefreshToken,
       });
-      setAuthInfo({
+      const userResponse = await userAPI.viewUser(tokenResponse.data.access);
+
+      if (!userResponse.data.user) {
+        throw new Error("Failed to get user");
+      }
+      setAuth({
         accessToken: tokenResponse.data.access,
         refreshToken: tokenResponse.data.refresh,
+        user: userResponse.data.user,
       });
     } catch {
       // TODO: deal with condition where refresh API fails due to invalid token or
       // other network error
       clearAuthInfo(); // this should be conditional
     }
-  }, [setAuthInfo, clearAuthInfo]);
+  }, [setAuth, clearAuthInfo]);
 
   React.useEffect(() => {
     // Initialize auth state based on localstorage
     const loadAuth = async () => {
-      setAuthLoading(true);
       const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
       const storedRefreshToken =
         localStorage.getItem(REFRESH_TOKEN_KEY) || null;
 
       if (!storedAccessToken || !storedRefreshToken) {
-        setAuthLoading(false);
+        clearAuthInfo();
         return;
       }
 
@@ -132,14 +149,12 @@ export const AuthProvider: React.FC = ({ children }) => {
           refreshToken: tokenResponse.data.refresh,
           user: userResponse.data.user,
         });
-        setAuthLoading(false);
         const refreshTimer = setInterval(refreshAuth, TEN_MINUTES_MS);
         return () => clearInterval(refreshTimer);
       } catch {
         // Throws decoding error if invalid or expired
         // Other potential errors when requesting new token set or getting user info
         clearAuthInfo();
-        setAuthLoading(false);
         return;
       }
     };
@@ -149,7 +164,6 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   const value: AuthProps = {
     ...authInfo,
-    authLoading,
     setAuthInfo: setAuth,
     clearAuthInfo,
   };
