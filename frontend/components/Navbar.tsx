@@ -46,7 +46,7 @@ const NavBar: FC = () => {
       <ThemeContext.Consumer>
         {({ themeName, toggleThemeName }) => (
           <AuthContext.Consumer>
-            {({ user, clearAuthInfo }) => (
+            {({ user }) => (
               <AppBar position="fixed" className={classes.root}>
                 <Toolbar>
                   <IconButton edge="start" color="inherit" aria-label="menu">
@@ -56,6 +56,9 @@ const NavBar: FC = () => {
                     <Typography variant="h6" className={classes.title}>
                       Full React Integration
                     </Typography>
+                  </Link>
+                  <Link href={"/about"}>
+                    <Button color="inherit">About</Button>
                   </Link>
                   <FormControlLabel
                     control={
@@ -99,12 +102,14 @@ const NavBar: FC = () => {
                         <MenuItem onClick={handleClose}>
                           Manage Account (TBD)
                         </MenuItem>
-                        <MenuItem onClick={clearAuthInfo}>Sign Out</MenuItem>
+                        <Link href="/logout">
+                          <MenuItem>Log Out</MenuItem>
+                        </Link>
                       </Menu>
                     </div>
                   ) : (
                     <Link href={"/login"}>
-                      <Button color="inherit">Login</Button>
+                      <Button color="inherit">Log In</Button>
                     </Link>
                   )}
                 </Toolbar>
