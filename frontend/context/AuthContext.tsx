@@ -41,8 +41,7 @@ const initialProps: AuthProps = {
 const ACCESS_TOKEN_KEY = "FRI_ACCESS_TOKEN";
 const REFRESH_TOKEN_KEY = "FRI_REFRESH_TOKEN";
 
-// const AUTH_REFRESH_INTERVAL = 600000;
-const AUTH_REFRESH_INTERVAL = 2000;
+const AUTH_REFRESH_INTERVAL = 600000;
 
 export const AuthContext = React.createContext<AuthProps>(initialProps);
 
