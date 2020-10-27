@@ -12,10 +12,6 @@ interface AuthInfo {
   authLoading: boolean;
 }
 
-// type RequiredAuthInfo = {
-//   [K in keyof AuthInfo]: NonNullable<AuthInfo[K]>;
-// };
-
 interface PresentAuthInfo {
   accessToken: string;
   refreshToken: string;
@@ -45,7 +41,8 @@ const initialProps: AuthProps = {
 const ACCESS_TOKEN_KEY = "FRI_ACCESS_TOKEN";
 const REFRESH_TOKEN_KEY = "FRI_REFRESH_TOKEN";
 
-const TEN_MINUTES_MS = 600000;
+// const AUTH_REFRESH_INTERVAL = 600000;
+const AUTH_REFRESH_INTERVAL = 2000;
 
 export const AuthContext = React.createContext<AuthProps>(initialProps);
 
@@ -149,8 +146,6 @@ export const AuthProvider: React.FC = ({ children }) => {
           refreshToken: tokenResponse.data.refresh,
           user: userResponse.data.user,
         });
-        const refreshTimer = setInterval(refreshAuth, TEN_MINUTES_MS);
-        return () => clearInterval(refreshTimer);
       } catch {
         // Throws decoding error if invalid or expired
         // Other potential errors when requesting new token set or getting user info
@@ -160,6 +155,8 @@ export const AuthProvider: React.FC = ({ children }) => {
     };
 
     loadAuth();
+    const refreshTimer = setInterval(refreshAuth, AUTH_REFRESH_INTERVAL);
+    return () => clearInterval(refreshTimer);
   }, [setAuth, clearAuthInfo, refreshAuth]);
 
   const value: AuthProps = {
