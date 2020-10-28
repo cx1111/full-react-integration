@@ -11,12 +11,14 @@ export const parseError = (e?: any): string => {
   // that falls out of the range of 2xx
   if (e.response && e.response.data) {
     // TODO: array
+    console.log(e.response, e.response.data);
+
     if (typeof e.response.data.detail === "string") {
       return e.response.data.detail;
     }
-    if (typeof e.response.data === "string") {
-      return e.response.data;
-    }
+
+    // Could be a string or an object
+    return e.response.data;
   }
   // The request was made but no response was received
   // `error.request` is an instance of XMLHttpRequest in the browser and an instance of

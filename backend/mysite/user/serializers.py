@@ -10,7 +10,7 @@ from user.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username',)
+        fields = ('username', 'email')
 
     def create(self, validated_data):
         """
@@ -45,17 +45,20 @@ class ActivateUserSerializer(serializers.Serializer):
         try:
             user = User.objects.get(pk=uid)
         except:
-            raise serializers.ValidationError("No user found with specified uid", code="invalid_uid")
+            raise serializers.ValidationError(
+                "No user found with specified uid", code="invalid_uid")
 
         if user.is_active:
-            raise serializers.ValidationError("The specified user's account has already been activated")
+            raise serializers.ValidationError(
+                "The specified user's account has already been activated")
         self.user = user
         return value
 
     # pylint: disable=arguments-differ
     def validate(self, data):
         if data['password1'] != data['password2']:
-            raise serializers.ValidationError("The specified passwords do not match")
+            raise serializers.ValidationError(
+                "The specified passwords do not match")
 
         if not token_generator.check_token(self.user, data['token']):
             raise serializers.ValidationError("The specified token is invalid")

@@ -16,7 +16,7 @@ export const lightTheme: ThemeOptions = {
       main: "#19857b",
     },
     error: {
-      main: "#a400",
+      main: "#f44336",
     },
     background: {
       default: "#fff",

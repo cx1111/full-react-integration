@@ -108,9 +108,14 @@ const NavBar: FC = () => {
                       </Menu>
                     </div>
                   ) : (
-                    <Link href={"/login"}>
-                      <Button color="inherit">Log In</Button>
-                    </Link>
+                    <>
+                      <Link href={"/login"}>
+                        <Button color="inherit">Log In</Button>
+                      </Link>
+                      <Link href={"/register"}>
+                        <Button color="inherit">Register</Button>
+                      </Link>
+                    </>
                   )}
                 </Toolbar>
               </AppBar>
