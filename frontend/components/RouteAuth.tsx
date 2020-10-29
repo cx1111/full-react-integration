@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../context/AuthContext";
 
 // Only returns child page if authenticated
 export const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({

@@ -5,7 +5,7 @@ import { Container, Typography } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import { AuthContext } from "../context/AuthContext";
-import { ProtectedRoute } from "../context/ProtectedRoute";
+import { ProtectedRoute } from "../components/RouteAuth";
 
 const useStyles = makeStyles({
   root: {

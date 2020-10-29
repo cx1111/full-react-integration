@@ -14,6 +14,7 @@ import { userAPI, GetTokenError } from "../lib/endpoints/user";
 import { AuthContext } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
 import { parseError, isDefaultError } from "../lib/endpoints/error";
+import { NoAuthRoute } from "../components/RouteAuth";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -83,80 +84,82 @@ const Login: React.FC = ({}) => {
   };
 
   return (
-    <Layout>
-      <Container component="main" maxWidth="xs">
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Log In
-          </Typography>
-          <form className={classes.form} noValidate>
-            <TextField
-              helperText={loginError?.username ? loginError.username[0] : ""}
-              error={Boolean(loginError?.username)}
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <TextField
-              helperText={loginError?.password ? loginError.password[0] : ""}
-              error={Boolean(loginError?.password)}
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {loginError?.non_field_errors && (
-              <Typography color={"error"}>
-                {loginError.non_field_errors[0]}
-              </Typography>
-            )}
-            <Button
-              fullWidth
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              onClick={(e) => {
-                e.preventDefault();
-                attemptLogin();
-              }}
-              disabled={loginLoading}
-            >
+    <NoAuthRoute>
+      <Layout>
+        <Container component="main" maxWidth="xs">
+          <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
               Log In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
+            </Typography>
+            <form className={classes.form} noValidate>
+              <TextField
+                helperText={loginError?.username ? loginError.username[0] : ""}
+                error={Boolean(loginError?.username)}
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoFocus
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <TextField
+                helperText={loginError?.password ? loginError.password[0] : ""}
+                error={Boolean(loginError?.password)}
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {loginError?.non_field_errors && (
+                <Typography color={"error"}>
+                  {loginError.non_field_errors[0]}
+                </Typography>
+              )}
+              <Button
+                fullWidth
+                type="submit"
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={(e) => {
+                  e.preventDefault();
+                  attemptLogin();
+                }}
+                disabled={loginLoading}
+              >
+                Log In
+              </Button>
+              <Grid container>
+                <Grid item xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link href="#" variant="body2">
+                    {"Create Account"}
+                  </Link>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Create Account"}
-                </Link>
-              </Grid>
-            </Grid>
-          </form>
-        </div>
-      </Container>
-    </Layout>
+            </form>
+          </div>
+        </Container>
+      </Layout>
+    </NoAuthRoute>
   );
 };
 

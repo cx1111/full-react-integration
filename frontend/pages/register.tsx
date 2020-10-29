@@ -13,7 +13,7 @@ import Container from "@material-ui/core/Container";
 import { userAPI, RegisterError } from "../lib/endpoints/user";
 import { useFetch } from "../hooks/useFetch";
 import { parseError, isDefaultError } from "../lib/endpoints/error";
-import { NoAuthRoute } from "../context/ProtectedRoute";
+import { NoAuthRoute } from "../components/RouteAuth";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
