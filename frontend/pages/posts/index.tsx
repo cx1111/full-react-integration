@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Container, Typography } from "@material-ui/core";
 import { useFetch } from "../../hooks/useFetch";
 import { forumAPI, ListPostsResponse } from "../../lib/endpoints/forum";
-import { parseError } from "../../lib/endpoints/utils";
+import { parseError } from "../../lib/endpoints/error";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import { displayDate } from "../../lib/utils/date";

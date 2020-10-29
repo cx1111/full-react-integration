@@ -10,9 +10,9 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import { userAPI } from "../lib/endpoints/user";
+import { userAPI, RegisterError } from "../lib/endpoints/user";
 import { useFetch } from "../hooks/useFetch";
-import { parseError } from "../lib/endpoints/utils";
+import { parseError, isDefaultError } from "../lib/endpoints/error";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -45,19 +45,24 @@ const Register: React.FC = ({}) => {
   const [
     { error: registerError, loading: registerLoading },
     { setError: setRegisterError, setLoading: setRegisterLoading },
-  ] = useFetch<any>({ loading: false });
+  ] = useFetch<any, RegisterError>({ loading: false });
 
   const attemptRegister = async () => {
     try {
       setRegisterLoading(true);
-      setRegisterError("");
+      setRegisterError(undefined);
       await userAPI.register({
         email,
         username,
       });
       router.push("/");
     } catch (e) {
-      setRegisterError(parseError(e));
+      const errorInfo = parseError<RegisterError>(e);
+      if (isDefaultError(errorInfo)) {
+        setRegisterError({ non_field_errors: [errorInfo.detail] });
+      } else {
+        setRegisterError(errorInfo);
+      }
     } finally {
       setRegisterLoading(false);
     }

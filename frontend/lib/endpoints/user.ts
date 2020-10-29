@@ -1,5 +1,6 @@
 import { AxiosPromise } from "axios";
-import { API } from "./utils";
+import { API } from "./coreapi";
+import { SerializerError } from "./error";
 
 export type User = {
   username: string;
@@ -32,6 +33,11 @@ export type RegisterParams = {
   email: string;
   username: string;
 };
+
+export interface RegisterError extends SerializerError {
+  email?: string[];
+  username?: string[];
+}
 
 class UserAPI {
   viewUser = (accessToken?: string): AxiosPromise<ViewUserResponse> => {

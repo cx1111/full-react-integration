@@ -12,7 +12,7 @@ import {
   ViewPostResponse,
   ListPostCommentsResponse,
 } from "../../lib/endpoints/forum";
-import { parseError } from "../../lib/endpoints/utils";
+import { parseError } from "../../lib/endpoints/error";
 import { displayDate } from "../../lib/utils/date";
 
 const useStyles = makeStyles({

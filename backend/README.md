@@ -28,7 +28,7 @@ python manage.py createsuperuser
 To register a user using the API endpoint:
 
 ```sh
-curl -X POST -H "Content-Type: application/json" -d '{"username":"<username>","email":"<email>"}' http://127.0.0.1:8000/api/register/
+curl -X POST -H "Content-Type: application/json" -d "{\"username\":\"${username}\",\"email\":\"${email}\"}" http://127.0.0.1:8000/api/register/
 ```
 
 This will create an inactive user, and send a verification link to the email address.

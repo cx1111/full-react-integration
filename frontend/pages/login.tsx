@@ -13,7 +13,7 @@ import Container from "@material-ui/core/Container";
 import { userAPI } from "../lib/endpoints/user";
 import { AuthContext } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
-import { parseError } from "../lib/endpoints/utils";
+import { parseError } from "../lib/endpoints/error";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
