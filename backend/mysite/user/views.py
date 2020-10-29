@@ -138,7 +138,7 @@ class ResendActivationEmailView(APIView):
         user = User.objects.filter(email=email).first()
 
         if not user or user.is_active:
-            return HttpResponseBadRequest("There is no inactive user with the specified email")
+            return Response({'detail': "There is no inactive user with the specified email"}, status=400)
 
         uidb64, token = create_token_info(user)
         send_activation_email(request, user, uidb64, token)

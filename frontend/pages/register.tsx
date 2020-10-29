@@ -80,8 +80,12 @@ const Register: React.FC = ({}) => {
           </Typography>
           <form className={classes.form}>
             <TextField
-              // helperText="Email"
-              // error={true}
+              helperText={
+                registerError && registerError.email
+                  ? registerError.email[0]
+                  : ""
+              }
+              error={Boolean(registerError && registerError.email)}
               variant="outlined"
               margin="normal"
               required
@@ -95,6 +99,12 @@ const Register: React.FC = ({}) => {
               onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
+              helperText={
+                registerError && registerError.username
+                  ? registerError.username[0]
+                  : ""
+              }
+              error={Boolean(registerError && registerError.username)}
               variant="outlined"
               margin="normal"
               required
@@ -105,7 +115,9 @@ const Register: React.FC = ({}) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            {registerError && <p>Error creating account: {registerError}</p>}
+            {registerError && registerError.non_field_errors && (
+              <p>{registerError.non_field_errors[0]}</p>
+            )}
             <Button
               fullWidth
               type="submit"

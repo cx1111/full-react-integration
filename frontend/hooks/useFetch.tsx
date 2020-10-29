@@ -30,7 +30,7 @@ export const useFetch = <T, TE = string>(
     ...state,
   };
   const [loading, setLoading] = React.useState(initialState.loading);
-  const [error, setError] = React.useState(initialState.error);
+  const [error, setError] = React.useState<TE | undefined>(initialState.error);
   const [data, setData] = React.useState<T | undefined>(initialState.data);
 
   const mounted = React.useRef(false);
