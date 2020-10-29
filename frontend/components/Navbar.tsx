@@ -30,7 +30,8 @@ const useStyles = makeStyles((_theme) => ({
 
 const NavBar: FC = () => {
   const classes = useStyles();
-
+  const { user } = React.useContext(AuthContext);
+  const { themeName, toggleThemeName } = React.useContext(ThemeContext);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -43,86 +44,76 @@ const NavBar: FC = () => {
 
   return (
     <NoSsr>
-      <ThemeContext.Consumer>
-        {({ themeName, toggleThemeName }) => (
-          <AuthContext.Consumer>
-            {({ user }) => (
-              <AppBar position="fixed" className={classes.root}>
-                <Toolbar>
-                  <IconButton edge="start" color="inherit" aria-label="menu">
-                    <MenuIcon />
-                  </IconButton>
-                  <Link href={"/"}>
-                    <Typography variant="h6" className={classes.title}>
-                      Full React Integration
-                    </Typography>
-                  </Link>
-                  <Link href={"/about"}>
-                    <Button color="inherit">About</Button>
-                  </Link>
-                  <FormControlLabel
-                    control={
-                      <SwitchUI
-                        checked={themeName === "light"}
-                        onChange={toggleThemeName}
-                      />
-                    }
-                    label="Light Mode"
-                  />
-                  {user ? (
-                    <div>
-                      <IconButton
-                        aria-label="account of current user"
-                        aria-controls="menu-appbar"
-                        aria-haspopup="true"
-                        onClick={handleMenu}
-                        color="inherit"
-                      >
-                        <AccountCircle />
-                      </IconButton>
-                      <Menu
-                        id="menu-appbar"
-                        anchorEl={anchorEl}
-                        anchorOrigin={{
-                          vertical: "top",
-                          horizontal: "right",
-                        }}
-                        anchorPosition={{ top: 1100, left: 100 }}
-                        keepMounted
-                        transformOrigin={{
-                          vertical: "top",
-                          horizontal: "right",
-                        }}
-                        open={Boolean(anchorEl)}
-                        onClose={handleClose}
-                      >
-                        <Link href="/profile">
-                          <MenuItem>View Profile</MenuItem>
-                        </Link>
-                        <MenuItem onClick={handleClose}>
-                          Manage Account (TBD)
-                        </MenuItem>
-                        <Link href="/logout">
-                          <MenuItem>Log Out</MenuItem>
-                        </Link>
-                      </Menu>
-                    </div>
-                  ) : (
-                    <>
-                      <Link href={"/login"}>
-                        <Button color="inherit">Log In</Button>
-                      </Link>
-                      <Link href={"/register"}>
-                        <Button color="inherit">Register</Button>
-                      </Link>
-                    </>
-                  )}
-                </Toolbar>
-              </AppBar>
-            )}
-          </AuthContext.Consumer>
-        )}
-      </ThemeContext.Consumer>
+      <AppBar position="fixed" className={classes.root}>
+        <Toolbar>
+          <IconButton edge="start" color="inherit" aria-label="menu">
+            <MenuIcon />
+          </IconButton>
+          <Link href={"/"}>
+            <Typography variant="h6" className={classes.title}>
+              Full React Integration
+            </Typography>
+          </Link>
+          <Link href={"/about"}>
+            <Button color="inherit">About</Button>
+          </Link>
+          <FormControlLabel
+            control={
+              <SwitchUI
+                checked={themeName === "light"}
+                onChange={toggleThemeName}
+              />
+            }
+            label="Light Mode"
+          />
+          {user ? (
+            <div>
+              <IconButton
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                anchorPosition={{ top: 1100, left: 100 }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <Link href="/profile">
+                  <MenuItem>View Profile</MenuItem>
+                </Link>
+                <MenuItem onClick={handleClose}>Manage Account (TBD)</MenuItem>
+                <Link href="/logout">
+                  <MenuItem>Log Out</MenuItem>
+                </Link>
+              </Menu>
+            </div>
+          ) : (
+            <>
+              <Link href={"/login"}>
+                <Button color="inherit">Log In</Button>
+              </Link>
+              <Link href={"/register"}>
+                <Button color="inherit">Register</Button>
+              </Link>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
     </NoSsr>
   );
 };
