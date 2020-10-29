@@ -13,6 +13,7 @@ import Container from "@material-ui/core/Container";
 import { userAPI, RegisterError } from "../lib/endpoints/user";
 import { useFetch } from "../hooks/useFetch";
 import { parseError, isDefaultError } from "../lib/endpoints/error";
+import { NoAuthRoute } from "../context/ProtectedRoute";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -36,8 +37,6 @@ const useStyles = makeStyles((theme) => ({
 const Register: React.FC = ({}) => {
   const classes = useStyles();
   const router = useRouter();
-  // TODO: Move this into common component for login and register
-  // const { user } = React.useContext(AuthContext);
 
   const [email, setEmail] = React.useState<string>("");
   const [username, setUsername] = React.useState<string>("");
@@ -69,81 +68,83 @@ const Register: React.FC = ({}) => {
   };
 
   return (
-    <Layout>
-      <Container component="main" maxWidth="xs">
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Create New Account
-          </Typography>
-          <form className={classes.form}>
-            <TextField
-              helperText={registerError?.email ? registerError.email[0] : ""}
-              error={Boolean(registerError?.email)}
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email"
-              name="email"
-              autoFocus
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              helperText={
-                registerError?.username ? registerError.username[0] : ""
-              }
-              error={Boolean(registerError?.username)}
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Username (4-20 characters)"
-              name="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            {registerError?.non_field_errors && (
-              <Typography color={"error"}>
-                {registerError.non_field_errors[0]}
-              </Typography>
-            )}
-            <Button
-              fullWidth
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              onClick={(e) => {
-                e.preventDefault();
-                attemptRegister();
-              }}
-              disabled={registerLoading}
-            >
-              Create Account
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
+    <NoAuthRoute>
+      <Layout>
+        <Container component="main" maxWidth="xs">
+          <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Create New Account
+            </Typography>
+            <form className={classes.form}>
+              <TextField
+                helperText={registerError?.email ? registerError.email[0] : ""}
+                error={Boolean(registerError?.email)}
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email"
+                name="email"
+                autoFocus
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                helperText={
+                  registerError?.username ? registerError.username[0] : ""
+                }
+                error={Boolean(registerError?.username)}
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username (4-20 characters)"
+                name="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              {registerError?.non_field_errors && (
+                <Typography color={"error"}>
+                  {registerError.non_field_errors[0]}
+                </Typography>
+              )}
+              <Button
+                fullWidth
+                type="submit"
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={(e) => {
+                  e.preventDefault();
+                  attemptRegister();
+                }}
+                disabled={registerLoading}
+              >
+                Create Account
+              </Button>
+              <Grid container>
+                <Grid item xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link href="/login" variant="body2">
+                    {"Log In with Existing Account"}
+                  </Link>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Link href="/login" variant="body2">
-                  {"Log In with Existing Account"}
-                </Link>
-              </Grid>
-            </Grid>
-          </form>
-        </div>
-      </Container>
-    </Layout>
+            </form>
+          </div>
+        </Container>
+      </Layout>
+    </NoAuthRoute>
   );
 };
 

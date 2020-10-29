@@ -20,3 +20,22 @@ export const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({
   }
   return null;
 };
+
+// Only returns child page if not authenticated
+export const NoAuthRoute: React.FC<{ children: JSX.Element }> = ({
+  children,
+}) => {
+  const router = useRouter();
+  const { user, authLoading } = React.useContext(AuthContext);
+
+  React.useEffect(() => {
+    if (!authLoading && user && process.browser) {
+      router.push("/");
+    }
+  }, [authLoading, user, router]);
+
+  if (!authLoading && !user) {
+    return children;
+  }
+  return null;
+};
