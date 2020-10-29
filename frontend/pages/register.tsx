@@ -80,12 +80,8 @@ const Register: React.FC = ({}) => {
           </Typography>
           <form className={classes.form}>
             <TextField
-              helperText={
-                registerError && registerError.email
-                  ? registerError.email[0]
-                  : ""
-              }
-              error={Boolean(registerError && registerError.email)}
+              helperText={registerError?.email ? registerError.email[0] : ""}
+              error={Boolean(registerError?.email)}
               variant="outlined"
               margin="normal"
               required
@@ -100,11 +96,9 @@ const Register: React.FC = ({}) => {
             />
             <TextField
               helperText={
-                registerError && registerError.username
-                  ? registerError.username[0]
-                  : ""
+                registerError?.username ? registerError.username[0] : ""
               }
-              error={Boolean(registerError && registerError.username)}
+              error={Boolean(registerError?.username)}
               variant="outlined"
               margin="normal"
               required
@@ -115,8 +109,10 @@ const Register: React.FC = ({}) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            {registerError && registerError.non_field_errors && (
-              <p>{registerError.non_field_errors[0]}</p>
+            {registerError?.non_field_errors && (
+              <Typography color={"error"}>
+                {registerError.non_field_errors[0]}
+              </Typography>
             )}
             <Button
               fullWidth

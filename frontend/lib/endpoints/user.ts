@@ -21,6 +21,11 @@ export type GetTokenResponse = {
   refresh: string;
 };
 
+export interface GetTokenError extends SerializerError {
+  username?: string[];
+  password?: string[];
+}
+
 export type RefreshTokenParams = {
   refresh: string;
 };

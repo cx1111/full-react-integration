@@ -10,10 +10,10 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import { userAPI } from "../lib/endpoints/user";
+import { userAPI, GetTokenError } from "../lib/endpoints/user";
 import { AuthContext } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
-import { parseError } from "../lib/endpoints/error";
+import { parseError, isDefaultError } from "../lib/endpoints/error";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -37,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
 const Login: React.FC = ({}) => {
   const classes = useStyles();
   const router = useRouter();
+  const { setAuthInfo } = React.useContext(AuthContext);
 
   const [username, setUsername] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
@@ -44,112 +45,117 @@ const Login: React.FC = ({}) => {
   const [
     { error: loginError, loading: loginLoading },
     { setError: setLoginError, setLoading: setLoginLoading },
-  ] = useFetch<any>({ loading: false });
+  ] = useFetch<any, GetTokenError>({ loading: false });
+
+  const attemptLogin = async () => {
+    try {
+      setLoginLoading(true);
+      setLoginError(undefined);
+      const tokenResponse = await userAPI.getToken({
+        username,
+        password,
+      });
+      const userResponse = await userAPI.viewUser(tokenResponse.data.access);
+
+      // Shows null user. Should never happen.
+      if (!userResponse.data.user) {
+        throw new Error("Something went wrong");
+      }
+      setAuthInfo({
+        accessToken: tokenResponse.data.access,
+        refreshToken: tokenResponse.data.refresh,
+        user: {
+          username: userResponse.data.user.username,
+          email: userResponse.data.user.email,
+        },
+      });
+      router.push("/");
+    } catch (e) {
+      const errorInfo = parseError<GetTokenError>(e);
+      if (isDefaultError(errorInfo)) {
+        setLoginError({ non_field_errors: [errorInfo.detail] });
+      } else {
+        setLoginError(errorInfo);
+      }
+    } finally {
+      setLoginLoading(false);
+    }
+  };
 
   return (
     <Layout>
-      <AuthContext.Consumer>
-        {({ setAuthInfo }) => {
-          const attemptLogin = async () => {
-            try {
-              setLoginLoading(true);
-              setLoginError("");
-              const tokenResponse = await userAPI.getToken({
-                username,
-                password,
-              });
-              const userResponse = await userAPI.viewUser(
-                tokenResponse.data.access
-              );
-
-              // Shows null user. Should never happen.
-              if (!userResponse.data.user) {
-                throw new Error("Something went wrong");
-              }
-              setAuthInfo({
-                accessToken: tokenResponse.data.access,
-                refreshToken: tokenResponse.data.refresh,
-                user: {
-                  username: userResponse.data.user.username,
-                  email: userResponse.data.user.email,
-                },
-              });
-              router.push("/");
-            } catch (e) {
-              setLoginError(parseError(e));
-            } finally {
-              setLoginLoading(false);
-            }
-          };
-
-          return (
-            <Container component="main" maxWidth="xs">
-              <div className={classes.paper}>
-                <Avatar className={classes.avatar}>
-                  <LockOutlinedIcon />
-                </Avatar>
-                <Typography component="h1" variant="h5">
-                  Sign in
-                </Typography>
-                <form className={classes.form} noValidate>
-                  <TextField
-                    variant="outlined"
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="username"
-                    label="Username"
-                    name="username"
-                    autoFocus
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                  <TextField
-                    variant="outlined"
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  {loginError && <p>Error logging in: {loginError}</p>}
-                  <Button
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    className={classes.submit}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      attemptLogin();
-                    }}
-                    disabled={loginLoading}
-                  >
-                    Sign In
-                  </Button>
-                  <Grid container>
-                    <Grid item xs>
-                      <Link href="#" variant="body2">
-                        Forgot password?
-                      </Link>
-                    </Grid>
-                    <Grid item>
-                      <Link href="#" variant="body2">
-                        {"Create Account"}
-                      </Link>
-                    </Grid>
-                  </Grid>
-                </form>
-              </div>
-            </Container>
-          );
-        }}
-      </AuthContext.Consumer>
+      <Container component="main" maxWidth="xs">
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Log In
+          </Typography>
+          <form className={classes.form} noValidate>
+            <TextField
+              helperText={loginError?.username ? loginError.username[0] : ""}
+              error={Boolean(loginError?.username)}
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="Username"
+              name="username"
+              autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <TextField
+              helperText={loginError?.password ? loginError.password[0] : ""}
+              error={Boolean(loginError?.password)}
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {loginError?.non_field_errors && (
+              <Typography color={"error"}>
+                {loginError.non_field_errors[0]}
+              </Typography>
+            )}
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={(e) => {
+                e.preventDefault();
+                attemptLogin();
+              }}
+              disabled={loginLoading}
+            >
+              Log In
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="#" variant="body2">
+                  Forgot password?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link href="#" variant="body2">
+                  {"Create Account"}
+                </Link>
+              </Grid>
+            </Grid>
+          </form>
+        </div>
+      </Container>
     </Layout>
   );
 };
