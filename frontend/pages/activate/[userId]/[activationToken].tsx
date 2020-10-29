@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
@@ -13,6 +14,12 @@ import { userAPI, RegisterError } from "../lib/endpoints/user";
 import { useFetch } from "../hooks/useFetch";
 import { parseError, isDefaultError } from "../lib/endpoints/error";
 import { NoAuthRoute } from "../components/RouteAuth";
+
+enum ValidStatus {
+  Unknown = 0,
+  Yes,
+  No,
+}
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -33,54 +40,105 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Register: React.FC = ({}) => {
+const ActivateAccount: React.FC = ({}) => {
   const classes = useStyles();
 
-  const [registerSuccess, setRegisterSuccess] = React.useState(false);
+  const router = useRouter();
+  const userID =
+    typeof router.query.userID === "string" ? router.query.userID : "";
+  const activationToken =
+    typeof router.query.activationToken === "string"
+      ? router.query.activationToken
+      : "";
+
+  // Whether the uid and activation token are valid
+  const [paramsValid, setParamsValid] = React.useState<ValidStatus>(
+    ValidStatus.Unknown
+  );
+
+  //   const [registerSuccess, setRegisterSuccess] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [username, setUsername] = React.useState("");
 
   const [
-    { error: registerError, loading: registerLoading },
-    { setError: setRegisterError, setLoading: setRegisterLoading },
+    { error: registerError, loading: activateLoading },
+    { setError: setActivateError, setLoading: setactivateLoading },
   ] = useFetch<any, RegisterError>({ loading: false });
 
-  const attemptRegister = async () => {
+  // Check whether the
+  const checkActivationParams = React.useCallback(async () => {
     try {
-      setRegisterLoading(true);
-      setRegisterError(undefined);
+      setactivateLoading(true);
+      setActivateError(undefined);
       await userAPI.register({
         email,
         username,
       });
-      setRegisterSuccess(true);
+      setParamsValid(ValidStatus.Yes);
     } catch (e) {
       const errorInfo = parseError<RegisterError>(e);
       if (isDefaultError(errorInfo)) {
-        setRegisterError({ non_field_errors: [errorInfo.detail] });
+        setActivateError({ non_field_errors: [errorInfo.detail] });
       } else {
-        setRegisterError(errorInfo);
+        setActivateError(errorInfo);
       }
     } finally {
-      setRegisterLoading(false);
+      setactivateLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    checkActivationParams();
+  }, [checkActivationParams]);
+
+  const attemptActivate = async () => {
+    try {
+      setactivateLoading(true);
+      setActivateError(undefined);
+      await userAPI.register({
+        email,
+        username,
+      });
+      setParamsValid(ValidStatus.Yes);
+    } catch (e) {
+      const errorInfo = parseError<RegisterError>(e);
+      if (isDefaultError(errorInfo)) {
+        setActivateError({ non_field_errors: [errorInfo.detail] });
+      } else {
+        setActivateError(errorInfo);
+      }
+    } finally {
+      setactivateLoading(false);
     }
   };
 
-  if (registerSuccess) {
+  if (paramsValid === ValidStatus.No) {
     return (
       <Layout>
         <Container component="main" maxWidth="xs">
           <Typography component="h1" variant="h5">
-            Registration Successful!
+            Invalid Activation Link
           </Typography>
-          <Typography>
-            Your account has been created. Follow the instructions in the email
-            sent to your address to activate your account.
-          </Typography>
+          <Typography>This activation link is invalid.</Typography>
         </Container>
       </Layout>
     );
   }
+
+  //   if (registerSuccess) {
+  //     return (
+  //       <Layout>
+  //         <Container component="main" maxWidth="xs">
+  //           <Typography component="h1" variant="h5">
+  //             Activation Complete!
+  //           </Typography>
+  //           <Typography>
+  //             Your account has been activated. You may now log in.
+  //           </Typography>
+  //         </Container>
+  //       </Layout>
+  //     );
+  //   }
 
   return (
     <NoAuthRoute redirectTo={"/"}>
@@ -137,9 +195,9 @@ const Register: React.FC = ({}) => {
                 className={classes.submit}
                 onClick={(e) => {
                   e.preventDefault();
-                  attemptRegister();
+                  attemptActivate();
                 }}
-                disabled={registerLoading}
+                disabled={activateLoading}
               >
                 Create Account
               </Button>
@@ -163,4 +221,4 @@ const Register: React.FC = ({}) => {
   );
 };
 
-export default Register;
+export default ActivateAccount;

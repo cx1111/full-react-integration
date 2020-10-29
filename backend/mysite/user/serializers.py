@@ -25,13 +25,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         return user
 
-    # pylint: disable=arguments-differ
-    def validate(self, data):
-        if (1 > 0):
-            raise serializers.ValidationError("No way mate")
-
-        return data
-
 
 class ActivateUserSerializer(serializers.Serializer):
     """
