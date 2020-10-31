@@ -5,7 +5,7 @@ import { Container, Typography } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import { AuthContext } from "../context/AuthContext";
-import { ProtectedRoute } from "../context/ProtectedRoute";
+import { ProtectedRoute } from "../components/RouteAuth";
 
 const useStyles = makeStyles({
   root: {
@@ -26,29 +26,27 @@ const useStyles = makeStyles({
 
 const Profile: React.FC = ({}) => {
   const classes = useStyles();
+
+  const { user } = React.useContext(AuthContext);
   return (
     <ProtectedRoute>
-      <AuthContext.Consumer>
-        {({ user }) => (
-          <Layout>
-            <Container maxWidth="lg">
-              <Typography variant={"h1"} component={"h1"}>
-                Your Profile
+      <Layout>
+        <Container maxWidth="lg">
+          <Typography variant={"h1"} component={"h1"}>
+            Your Profile
+          </Typography>
+          <Card className={classes.root} variant="outlined">
+            <CardContent>
+              <Typography variant="h5" component="h2">
+                Username: {user && user.username}
               </Typography>
-              <Card className={classes.root} variant="outlined">
-                <CardContent>
-                  <Typography variant="h5" component="h2">
-                    Username: {user && user.username}
-                  </Typography>
-                  <Typography className={classes.pos} color="textSecondary">
-                    Email: {user && user.email}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Container>
-          </Layout>
-        )}
-      </AuthContext.Consumer>
+              <Typography className={classes.pos} color="textSecondary">
+                Email: {user && user.email}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Container>
+      </Layout>
     </ProtectedRoute>
   );
 };

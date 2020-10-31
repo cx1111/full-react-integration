@@ -28,11 +28,10 @@ python manage.py createsuperuser
 To register a user using the API endpoint:
 
 ```sh
-curl -X POST -H "Content-Type: application/json" -d '{"username":"<username>","email":"<email>"}' http://127.0.0.1:8000/api/register/
+curl -X POST -H "Content-Type: application/json" -d "{\"username\":\"${username}\",\"email\":\"${email}\"}" http://127.0.0.1:8000/api/register/
 ```
 
 This will create an inactive user, and send a verification link to the email address.
-
 
 To request another verification link:
 
@@ -43,9 +42,8 @@ curl -X POST -H "Content-Type: application/json" -d '{"email":"<email>"}' http:/
 To verify the account and set the password:
 
 ```sh
-curl -X POST -H "Content-Type: application/json" -d '{"uidb64":"<uidb64>","token":"<token>","password1":"<password1>","password2":"<password2>"}' http://127.0.0.1:8000/api/verify-account/
+curl -X POST -H "Content-Type: application/json" -d "{\"uidb64\":\"${UIDB64}\",\"token\":\"${TOKEN}\",\"password1\":\"${PASSWORD1}\",\"password2\":\"${PASSWORD2}\"}" http://127.0.0.1:8000/api/verify-account/
 ```
-
 
 ### Access Endpoints
 
@@ -70,7 +68,6 @@ curl -X POST -d refresh=<refreshtoken> http://127.0.0.1:8000/api/token/blacklist
 ```
 
 There is no provided endpoint to blacklist an access token, which are to expire quickly on their own.
-
 
 To use the refresh token to get another access and refresh token:
 
@@ -107,7 +104,6 @@ View a post's top-level comments:
 ```sh
 curl -X GET -H 'Accept: application/json; indent=2' "http://127.0.0.1:8000/api/post/${POST_ID}/comments/"
 ```
-
 
 ### Comments
 

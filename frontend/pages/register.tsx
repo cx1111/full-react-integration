@@ -1,5 +1,4 @@
 import React from "react";
-import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
@@ -10,8 +9,7 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import { userAPI, GetTokenError } from "../lib/endpoints/user";
-import { AuthContext } from "../context/AuthContext";
+import { userAPI, RegisterError } from "../lib/endpoints/user";
 import { useFetch } from "../hooks/useFetch";
 import { parseError, isDefaultError } from "../lib/endpoints/error";
 import { NoAuthRoute } from "../components/RouteAuth";
@@ -35,56 +33,57 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login: React.FC = ({}) => {
+const Register: React.FC = ({}) => {
   const classes = useStyles();
-  const router = useRouter();
-  const { setAuthInfo } = React.useContext(AuthContext);
 
-  const [username, setUsername] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
+  const [registerSuccess, setRegisterSuccess] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [username, setUsername] = React.useState("");
 
   const [
-    { error: loginError, loading: loginLoading },
-    { setError: setLoginError, setLoading: setLoginLoading },
-  ] = useFetch<any, GetTokenError>({ loading: false });
+    { error: registerError, loading: registerLoading },
+    { setError: setRegisterError, setLoading: setRegisterLoading },
+  ] = useFetch<any, RegisterError>({ loading: false });
 
-  const attemptLogin = async () => {
+  const attemptRegister = async () => {
     try {
-      setLoginLoading(true);
-      setLoginError(undefined);
-      const tokenResponse = await userAPI.getToken({
+      setRegisterLoading(true);
+      setRegisterError(undefined);
+      await userAPI.register({
+        email,
         username,
-        password,
       });
-      const userResponse = await userAPI.viewUser(tokenResponse.data.access);
-
-      // Shows null user. Should never happen.
-      if (!userResponse.data.user) {
-        throw new Error("Something went wrong");
-      }
-      setAuthInfo({
-        accessToken: tokenResponse.data.access,
-        refreshToken: tokenResponse.data.refresh,
-        user: {
-          username: userResponse.data.user.username,
-          email: userResponse.data.user.email,
-        },
-      });
-      router.push("/");
+      setRegisterSuccess(true);
     } catch (e) {
-      const errorInfo = parseError<GetTokenError>(e);
+      const errorInfo = parseError<RegisterError>(e);
       if (isDefaultError(errorInfo)) {
-        setLoginError({ non_field_errors: [errorInfo.detail] });
+        setRegisterError({ non_field_errors: [errorInfo.detail] });
       } else {
-        setLoginError(errorInfo);
+        setRegisterError(errorInfo);
       }
     } finally {
-      setLoginLoading(false);
+      setRegisterLoading(false);
     }
   };
 
+  if (registerSuccess) {
+    return (
+      <Layout>
+        <Container component="main" maxWidth="xs">
+          <Typography component="h1" variant="h5">
+            Registration Successful!
+          </Typography>
+          <Typography>
+            Your account has been created. Follow the instructions in the email
+            sent to your address to activate your account.
+          </Typography>
+        </Container>
+      </Layout>
+    );
+  }
+
   return (
-    <NoAuthRoute>
+    <NoAuthRoute redirectTo={"/"}>
       <Layout>
         <Container component="main" maxWidth="xs">
           <div className={classes.paper}>
@@ -92,41 +91,42 @@ const Login: React.FC = ({}) => {
               <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              Log In
+              Create New Account
             </Typography>
-            <form className={classes.form} noValidate>
+            <form className={classes.form}>
               <TextField
-                helperText={loginError?.username ? loginError.username[0] : ""}
-                error={Boolean(loginError?.username)}
+                helperText={registerError?.email ? registerError.email[0] : ""}
+                error={Boolean(registerError?.email)}
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email"
+                name="email"
+                autoFocus
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                helperText={
+                  registerError?.username ? registerError.username[0] : ""
+                }
+                error={Boolean(registerError?.username)}
                 variant="outlined"
                 margin="normal"
                 required
                 fullWidth
                 id="username"
-                label="Username"
+                label="Username (4-20 characters)"
                 name="username"
-                autoFocus
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <TextField
-                helperText={loginError?.password ? loginError.password[0] : ""}
-                error={Boolean(loginError?.password)}
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              {loginError?.non_field_errors && (
+              {registerError?.non_field_errors && (
                 <Typography color={"error"}>
-                  {loginError.non_field_errors[0]}
+                  {registerError.non_field_errors[0]}
                 </Typography>
               )}
               <Button
@@ -137,11 +137,11 @@ const Login: React.FC = ({}) => {
                 className={classes.submit}
                 onClick={(e) => {
                   e.preventDefault();
-                  attemptLogin();
+                  attemptRegister();
                 }}
-                disabled={loginLoading}
+                disabled={registerLoading}
               >
-                Log In
+                Create Account
               </Button>
               <Grid container>
                 <Grid item xs>
@@ -150,8 +150,8 @@ const Login: React.FC = ({}) => {
                   </Link>
                 </Grid>
                 <Grid item>
-                  <Link href="#" variant="body2">
-                    {"Create Account"}
+                  <Link href="/login" variant="body2">
+                    {"Log In with Existing Account"}
                   </Link>
                 </Grid>
               </Grid>
@@ -163,4 +163,4 @@ const Login: React.FC = ({}) => {
   );
 };
 
-export default Login;
+export default Register;

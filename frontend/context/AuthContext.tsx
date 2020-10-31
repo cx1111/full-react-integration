@@ -1,6 +1,7 @@
 import React from "react";
 import jwt from "jsonwebtoken";
 import { User, userAPI } from "../lib/endpoints/user";
+import { getGenericReducer } from "../lib/utils/reducer";
 
 // Actual auth data
 interface AuthInfo {
@@ -37,8 +38,7 @@ const initialProps: AuthProps = {
   clearAuthInfo: () => {},
 };
 
-// Keys for browser storage
-const ACCESS_TOKEN_KEY = "FRI_ACCESS_TOKEN";
+// Key for browser storage
 const REFRESH_TOKEN_KEY = "FRI_REFRESH_TOKEN";
 
 const AUTH_REFRESH_INTERVAL = 600000;
@@ -47,23 +47,17 @@ export const AuthContext = React.createContext<AuthProps>(initialProps);
 
 AuthContext.displayName = "AuthContext";
 
-const authReducer = (
-  authInfo: AuthInfo,
-  partialauthInfo: Partial<AuthInfo>
-) => ({
-  ...authInfo,
-  ...partialauthInfo,
-});
-
 // Custom provider to implement auth state
 export const AuthProvider: React.FC = ({ children }) => {
-  const [authInfo, setAuthInfo] = React.useReducer(authReducer, initialInfo);
+  const [authInfo, setAuthInfo] = React.useReducer(
+    getGenericReducer<AuthInfo>(),
+    initialInfo
+  );
 
   // Set the valid authentication info in global context and localstorage
   const setAuth = React.useCallback(
     (authInfo: PresentAuthInfo) => {
       setAuthInfo({ ...authInfo, authLoading: false });
-      localStorage.setItem(ACCESS_TOKEN_KEY, authInfo.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, authInfo.refreshToken);
     },
     [setAuthInfo]
@@ -72,7 +66,6 @@ export const AuthProvider: React.FC = ({ children }) => {
   // Clear auth info from global context and localstorage
   const clearAuthInfo = React.useCallback(() => {
     const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     setAuthInfo({
       accessToken: null,
@@ -119,11 +112,10 @@ export const AuthProvider: React.FC = ({ children }) => {
   React.useEffect(() => {
     // Initialize auth state based on localstorage
     const loadAuth = async () => {
-      const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
       const storedRefreshToken =
         localStorage.getItem(REFRESH_TOKEN_KEY) || null;
 
-      if (!storedAccessToken || !storedRefreshToken) {
+      if (!storedRefreshToken) {
         clearAuthInfo();
         return;
       }

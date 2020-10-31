@@ -1,34 +1,36 @@
 // Hook for fetching data from an endpoint
 import React from "react";
 
-type UseFetch<T> = [
-  { data?: T; loading: boolean; error?: string },
+type UseFetch<T, TE> = [
+  { data?: T; loading: boolean; error?: TE },
   {
     setLoading(loading: boolean): void;
-    setError(error?: string): void;
+    setError(error?: TE): void;
     setData(data?: T): void;
   }
 ];
 
-type InitialState<T> = {
+type InitialState<T, TE> = {
   loading?: boolean;
-  error?: string;
+  error?: TE;
   data?: T | (() => T);
 };
 
 const defaultInitialState = {
   loading: false,
-  error: "",
+  error: undefined,
   data: undefined,
 };
 
-export const useFetch = <T,>(state?: InitialState<T>): UseFetch<T> => {
+export const useFetch = <T, TE = string>(
+  state?: InitialState<T, TE>
+): UseFetch<T, TE> => {
   const initialState = {
     ...defaultInitialState,
     ...state,
   };
   const [loading, setLoading] = React.useState(initialState.loading);
-  const [error, setError] = React.useState(initialState.error);
+  const [error, setError] = React.useState<TE | undefined>(initialState.error);
   const [data, setData] = React.useState<T | undefined>(initialState.data);
 
   const mounted = React.useRef(false);
@@ -46,7 +48,7 @@ export const useFetch = <T,>(state?: InitialState<T>): UseFetch<T> => {
     }
   }, []);
 
-  const safeSetError = React.useCallback((e: string) => {
+  const safeSetError = React.useCallback((e: TE) => {
     if (mounted.current) {
       setError(e);
     }

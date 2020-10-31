@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.http import HttpResponseBadRequest
 from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode
 from django.template import loader
 
 from rest_framework.parsers import JSONParser
@@ -15,10 +15,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-
 from mysite.utils import get_url_prefix
 from user.models import User
-from user.serializers import ActivateUserSerializer, UserSerializer
+from user.serializers import ActivateUserCheckSerializer, ActivateUserSerializer, UserSerializer
 
 
 class HelloView(APIView):
@@ -138,7 +137,7 @@ class ResendActivationEmailView(APIView):
         user = User.objects.filter(email=email).first()
 
         if not user or user.is_active:
-            return HttpResponseBadRequest("There is no inactive user with the specified email")
+            return Response({'detail': "There is no inactive user with the specified email"}, status=400)
 
         uidb64, token = create_token_info(user)
         send_activation_email(request, user, uidb64, token)
@@ -151,21 +150,10 @@ class CheckActivationTokenView(APIView):
     """
 
     def get(self, request):
-        uidb64 = request.data.get('uidb64')
-        token = request.data.get('token')
-        # TODO: Serializer
-        # TODO: 200 response for invalid params?
-        try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return HttpResponseBadRequest("No user found with the specified uid")
-
-        if not token_generator.check_token(user, token):
-            # Figure out expired or invalid in general
-            return HttpResponseBadRequest("Invalid activation token")
-
-        return Response({"valid": True}, status=200)
+        serializer = ActivateUserCheckSerializer(data=request.query_params)
+        if serializer.is_valid():
+            return Response({'valid': True}, status=200)
+        return Response(serializer.errors, status=400)
 
 
 class ActivateUserView(APIView):

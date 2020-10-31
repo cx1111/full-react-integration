@@ -1,5 +1,5 @@
 import { AxiosPromise } from "axios";
-import { API } from "./utils";
+import { API } from "./coreapi";
 
 type Post = {
   id: string;
