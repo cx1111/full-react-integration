@@ -44,6 +44,31 @@ export interface RegisterError extends SerializerError {
   username?: string[];
 }
 
+export type CheckActivationParams = {
+  uidb64: string;
+  token: string;
+};
+
+export type CheckActivationResponse = {
+  valid: boolean;
+};
+
+export interface ActivateUserParams extends CheckActivationParams {
+  password1: string;
+  password2: string;
+}
+
+export type ActivateUserResponse = {
+  activated: boolean;
+};
+
+export interface ActivateUserError extends SerializerError {
+  uidb64?: string[];
+  token?: string[];
+  password1?: string[];
+  password2?: string;
+}
+
 class UserAPI {
   viewUser = (accessToken?: string): AxiosPromise<ViewUserResponse> => {
     if (accessToken) {
@@ -67,6 +92,16 @@ class UserAPI {
 
   register = (params: RegisterParams): AxiosPromise<null> =>
     API.request.post("api/register/", { ...params });
+
+  checkActivation = (
+    params: CheckActivationParams
+  ): AxiosPromise<CheckActivationResponse> =>
+    API.request.get("api/check-activation-token/", { params });
+
+  activateUser = (
+    params: ActivateUserParams
+  ): AxiosPromise<ActivateUserResponse> =>
+    API.request.post("api/activate-user/", { ...params });
 }
 
 export const userAPI = new UserAPI();

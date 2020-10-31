@@ -1,6 +1,7 @@
 import React from "react";
 import jwt from "jsonwebtoken";
 import { User, userAPI } from "../lib/endpoints/user";
+import { getGenericReducer } from "../lib/utils/reducer";
 
 // Actual auth data
 interface AuthInfo {
@@ -47,17 +48,12 @@ export const AuthContext = React.createContext<AuthProps>(initialProps);
 
 AuthContext.displayName = "AuthContext";
 
-const authReducer = (
-  authInfo: AuthInfo,
-  partialauthInfo: Partial<AuthInfo>
-) => ({
-  ...authInfo,
-  ...partialauthInfo,
-});
-
 // Custom provider to implement auth state
 export const AuthProvider: React.FC = ({ children }) => {
-  const [authInfo, setAuthInfo] = React.useReducer(authReducer, initialInfo);
+  const [authInfo, setAuthInfo] = React.useReducer(
+    getGenericReducer<AuthInfo>(),
+    initialInfo
+  );
 
   // Set the valid authentication info in global context and localstorage
   const setAuth = React.useCallback(

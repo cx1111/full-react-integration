@@ -1,6 +1,5 @@
 import React from "react";
 import { useRouter } from "next/router";
-import Layout from "../components/Layout";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -10,10 +9,17 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import { userAPI, RegisterError } from "../lib/endpoints/user";
-import { useFetch } from "../hooks/useFetch";
-import { parseError, isDefaultError } from "../lib/endpoints/error";
-import { NoAuthRoute } from "../components/RouteAuth";
+import Layout from "../../../components/Layout";
+import { userAPI, ActivateUserError } from "../../../lib/endpoints/user";
+import { useFetch } from "../../../hooks/useFetch";
+import { parseError, isDefaultError } from "../../../lib/endpoints/error";
+import { NoAuthRoute } from "../../../components/RouteAuth";
+import { getGenericReducer } from "../../../lib/utils/reducer";
+
+interface ActivateFields {
+  password1: string;
+  password2: string;
+}
 
 enum ValidStatus {
   Unknown = 0,
@@ -44,75 +50,88 @@ const ActivateAccount: React.FC = ({}) => {
   const classes = useStyles();
 
   const router = useRouter();
-  const userID =
-    typeof router.query.userID === "string" ? router.query.userID : "";
+  const uidb64 =
+    typeof router.query.uidb64 === "string" ? router.query.uidb64 : undefined;
   const activationToken =
     typeof router.query.activationToken === "string"
       ? router.query.activationToken
-      : "";
+      : undefined;
 
   // Whether the uid and activation token are valid
   const [paramsValid, setParamsValid] = React.useState<ValidStatus>(
     ValidStatus.Unknown
   );
 
+  // TODO: Check API returns username and email?
   //   const [registerSuccess, setRegisterSuccess] = React.useState(false);
-  const [email, setEmail] = React.useState("");
-  const [username, setUsername] = React.useState("");
+
+  const [activateFields, setActivateFields] = React.useReducer(
+    getGenericReducer<ActivateFields>(),
+    {
+      password1: "",
+      password2: "",
+    }
+  );
 
   const [
-    { error: registerError, loading: activateLoading },
-    { setError: setActivateError, setLoading: setactivateLoading },
-  ] = useFetch<any, RegisterError>({ loading: false });
+    { error: activateError, loading: activateLoading },
+    { setError: setActivateError, setLoading: setActivateLoading },
+  ] = useFetch<any, ActivateUserError>({ loading: false });
 
-  // Check whether the
-  const checkActivationParams = React.useCallback(async () => {
-    try {
-      setactivateLoading(true);
-      setActivateError(undefined);
-      await userAPI.register({
-        email,
-        username,
-      });
-      setParamsValid(ValidStatus.Yes);
-    } catch (e) {
-      const errorInfo = parseError<RegisterError>(e);
-      if (isDefaultError(errorInfo)) {
-        setActivateError({ non_field_errors: [errorInfo.detail] });
-      } else {
-        setActivateError(errorInfo);
-      }
-    } finally {
-      setactivateLoading(false);
-    }
-  }, []);
+  // Check whether the uid and activation token are valid
+  //   const checkActivationParams = React.useCallback(, [uidb64, activationToken]);
 
   React.useEffect(() => {
-    checkActivationParams();
-  }, [checkActivationParams]);
+    const checkActivationParams = async (uid: string, token: string) => {
+      try {
+        await userAPI.checkActivation({
+          uidb64: uid,
+          token,
+        });
+        setParamsValid(ValidStatus.Yes);
+      } catch (e) {
+        // No need to display the details. Just show that the link is invalid
+        // TODO: deal with server down?
+        setParamsValid(ValidStatus.No);
+      }
+    };
+
+    console.log("yo", uidb64, activationToken);
+    // TODO: Figure out proper condition to call this
+    if (uidb64 && activationToken) {
+      console.log("in", uidb64, activationToken);
+      checkActivationParams(uidb64, activationToken);
+    }
+  }, [uidb64, activationToken, paramsValid]);
 
   const attemptActivate = async () => {
+    if (!uidb64 || !activationToken) {
+      return;
+    }
     try {
-      setactivateLoading(true);
+      setActivateLoading(true);
       setActivateError(undefined);
-      await userAPI.register({
-        email,
-        username,
+      await userAPI.activateUser({
+        uidb64,
+        token: activationToken,
+        password1: activateFields.password1,
+        password2: activateFields.password2,
       });
-      setParamsValid(ValidStatus.Yes);
     } catch (e) {
-      const errorInfo = parseError<RegisterError>(e);
+      const errorInfo = parseError<ActivateUserError>(e);
       if (isDefaultError(errorInfo)) {
         setActivateError({ non_field_errors: [errorInfo.detail] });
       } else {
         setActivateError(errorInfo);
       }
     } finally {
-      setactivateLoading(false);
+      setActivateLoading(false);
     }
   };
 
-  if (paramsValid === ValidStatus.No) {
+  if (paramsValid === ValidStatus.Unknown) {
+    return null;
+  } else if (paramsValid === ValidStatus.No) {
     return (
       <Layout>
         <Container component="main" maxWidth="xs">
@@ -125,21 +144,6 @@ const ActivateAccount: React.FC = ({}) => {
     );
   }
 
-  //   if (registerSuccess) {
-  //     return (
-  //       <Layout>
-  //         <Container component="main" maxWidth="xs">
-  //           <Typography component="h1" variant="h5">
-  //             Activation Complete!
-  //           </Typography>
-  //           <Typography>
-  //             Your account has been activated. You may now log in.
-  //           </Typography>
-  //         </Container>
-  //       </Layout>
-  //     );
-  //   }
-
   return (
     <NoAuthRoute redirectTo={"/"}>
       <Layout>
@@ -149,42 +153,39 @@ const ActivateAccount: React.FC = ({}) => {
               <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              Create New Account
+              Activate Account
             </Typography>
             <form className={classes.form}>
               <TextField
-                helperText={registerError?.email ? registerError.email[0] : ""}
-                error={Boolean(registerError?.email)}
+                // helperText={activateError?.email ? activateError.email[0] : ""}
+                // error={Boolean(activateError?.email)}
                 variant="outlined"
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Email"
-                name="email"
+                label="Password"
+                name="password1"
                 autoFocus
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={activateFields.password1}
+                onChange={(e) =>
+                  setActivateFields({ password1: e.target.value })
+                }
               />
               <TextField
-                helperText={
-                  registerError?.username ? registerError.username[0] : ""
-                }
-                error={Boolean(registerError?.username)}
                 variant="outlined"
                 margin="normal"
                 required
                 fullWidth
-                id="username"
-                label="Username (4-20 characters)"
-                name="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                label="Confirm Password"
+                name="password2"
+                value={activateFields.password2}
+                onChange={(e) =>
+                  setActivateFields({ password2: e.target.value })
+                }
               />
-              {registerError?.non_field_errors && (
+              {activateError?.non_field_errors && (
                 <Typography color={"error"}>
-                  {registerError.non_field_errors[0]}
+                  {activateError.non_field_errors[0]}
                 </Typography>
               )}
               <Button

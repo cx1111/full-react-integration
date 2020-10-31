@@ -15,10 +15,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-
 from mysite.utils import get_url_prefix
 from user.models import User
-from user.serializers import ActivateUserSerializer, UserSerializer
+from user.serializers import ActivateUserCheckSerializer, ActivateUserSerializer, UserSerializer
 
 
 class HelloView(APIView):
@@ -151,21 +150,12 @@ class CheckActivationTokenView(APIView):
     """
 
     def get(self, request):
-        uidb64 = request.data.get('uidb64')
-        token = request.data.get('token')
-        # TODO: Serializer
-        # TODO: 200 response for invalid params?
-        try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return HttpResponseBadRequest("No user found with the specified uid")
+        data = JSONParser().parse(request)
+        serializer = ActivateUserCheckSerializer(data=data)
+        if serializer.is_valid():
+            return Response({'valid': True}, status=200)
 
-        if not token_generator.check_token(user, token):
-            # Figure out expired or invalid in general
-            return HttpResponseBadRequest("Invalid activation token")
-
-        return Response({"valid": True}, status=200)
+        return Response(serializer.errors, status=400)
 
 
 class ActivateUserView(APIView):
