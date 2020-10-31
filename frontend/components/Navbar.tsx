@@ -14,6 +14,7 @@ import {
 } from "@material-ui/core";
 import SwitchUI from "@material-ui/core/Switch";
 import AccountCircle from "@material-ui/icons/AccountCircle";
+import ExitToApp from "@material-ui/icons/ExitToApp";
 import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
 import MenuIcon from "@material-ui/icons/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -103,14 +104,40 @@ const NavBar: FC = () => {
               </Menu>
             </div>
           ) : (
-            <>
-              <Link href={"/login"}>
-                <Button color="inherit">Log In</Button>
-              </Link>
-              <Link href={"/register"}>
-                <Button color="inherit">Register</Button>
-              </Link>
-            </>
+            <div>
+              <IconButton
+                aria-label="account links"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <ExitToApp />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                anchorPosition={{ top: 1100, left: 100 }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <Link href={"/login"}>
+                  <MenuItem>Log In</MenuItem>
+                </Link>
+                <Link href={"/register"}>
+                  <MenuItem>Register</MenuItem>
+                </Link>
+              </Menu>
+            </div>
           )}
         </Toolbar>
       </AppBar>
