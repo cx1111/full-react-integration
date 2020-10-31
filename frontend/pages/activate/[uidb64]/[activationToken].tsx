@@ -3,8 +3,6 @@ import { useRouter } from "next/router";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
@@ -62,9 +60,7 @@ const ActivateAccount: React.FC = ({}) => {
     ValidStatus.Unknown
   );
 
-  // TODO: Check API returns username and email?
-  //   const [registerSuccess, setRegisterSuccess] = React.useState(false);
-
+  // TODO: Check API returns username and email, and display them?
   const [activateFields, setActivateFields] = React.useReducer(
     getGenericReducer<ActivateFields>(),
     {
@@ -78,9 +74,7 @@ const ActivateAccount: React.FC = ({}) => {
     { setError: setActivateError, setLoading: setActivateLoading },
   ] = useFetch<any, ActivateUserError>({ loading: false });
 
-  // Check whether the uid and activation token are valid
-  //   const checkActivationParams = React.useCallback(, [uidb64, activationToken]);
-
+  // Check whether the uid and activation token from the url are valid
   React.useEffect(() => {
     const checkActivationParams = async (uid: string, token: string) => {
       try {
@@ -96,13 +90,11 @@ const ActivateAccount: React.FC = ({}) => {
       }
     };
 
-    console.log("yo", uidb64, activationToken);
     // TODO: Figure out proper condition to call this
     if (uidb64 && activationToken) {
-      console.log("in", uidb64, activationToken);
       checkActivationParams(uidb64, activationToken);
     }
-  }, [uidb64, activationToken, paramsValid]);
+  }, [uidb64, activationToken]);
 
   const attemptActivate = async () => {
     if (!uidb64 || !activationToken) {
@@ -117,6 +109,7 @@ const ActivateAccount: React.FC = ({}) => {
         password1: activateFields.password1,
         password2: activateFields.password2,
       });
+      router.push("/activate/success");
     } catch (e) {
       const errorInfo = parseError<ActivateUserError>(e);
       if (isDefaultError(errorInfo)) {
@@ -164,6 +157,7 @@ const ActivateAccount: React.FC = ({}) => {
                 required
                 fullWidth
                 label="Password"
+                type="password"
                 name="password1"
                 autoFocus
                 value={activateFields.password1}
@@ -177,6 +171,7 @@ const ActivateAccount: React.FC = ({}) => {
                 required
                 fullWidth
                 label="Confirm Password"
+                type="password"
                 name="password2"
                 value={activateFields.password2}
                 onChange={(e) =>
@@ -200,20 +195,8 @@ const ActivateAccount: React.FC = ({}) => {
                 }}
                 disabled={activateLoading}
               >
-                Create Account
+                Activate
               </Button>
-              <Grid container>
-                <Grid item xs>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
-                </Grid>
-                <Grid item>
-                  <Link href="/login" variant="body2">
-                    {"Log In with Existing Account"}
-                  </Link>
-                </Grid>
-              </Grid>
             </form>
           </div>
         </Container>

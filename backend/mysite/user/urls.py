@@ -16,7 +16,7 @@ urlpatterns = [
     # Registration
     path('api/register/', views.RegisterView.as_view(), name='register'),
     path('api/check-activation-token/', views.CheckActivationTokenView.as_view(), name='check_activation_token'),
-    path('api/verify-account/', views.ActivateUserView.as_view(), name='verify_account'),
+    path('api/activate-user/', views.ActivateUserView.as_view(), name='verify_account'),
     path('api/resend-activation/', views.ResendActivationEmailView.as_view(), name='resend_activation'),
 
     # General

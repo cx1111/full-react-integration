@@ -41,7 +41,7 @@ class ActivateUserCheckSerializer(serializers.Serializer):
         uid = force_text(urlsafe_base64_decode(value))
         try:
             user = User.objects.get(pk=uid)
-        except (ValueError, User.DoesNotExist) as invalid_uid:
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist) as invalid_uid:
             raise serializers.ValidationError(
                 "No user found with specified uid", code="invalid_uid") from invalid_uid
 

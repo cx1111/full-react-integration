@@ -150,11 +150,9 @@ class CheckActivationTokenView(APIView):
     """
 
     def get(self, request):
-        data = JSONParser().parse(request)
-        serializer = ActivateUserCheckSerializer(data=data)
+        serializer = ActivateUserCheckSerializer(data=request.query_params)
         if serializer.is_valid():
             return Response({'valid': True}, status=200)
-
         return Response(serializer.errors, status=400)
 
 

@@ -5,7 +5,7 @@ import Layout from "../../components/Layout";
 
 const ActivateSuccess: React.FC = () => {
   return (
-    <Layout>
+    <Layout title={"Account successfully activated"}>
       <Container component="main" maxWidth="xs">
         <Typography component="h1" variant="h5">
           Activation Complete!
