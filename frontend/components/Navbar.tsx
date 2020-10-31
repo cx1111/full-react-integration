@@ -12,10 +12,10 @@ import {
   makeStyles,
   NoSsr,
 } from "@material-ui/core";
-import SwitchUI from "@material-ui/core/Switch";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import ExitToApp from "@material-ui/icons/ExitToApp";
-import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
+import Brightness4 from "@material-ui/icons/Brightness4";
+import Brightness7 from "@material-ui/icons/Brightness7";
 import MenuIcon from "@material-ui/icons/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
@@ -58,15 +58,11 @@ const NavBar: FC = () => {
           <Link href={"/about"}>
             <Button color="inherit">About</Button>
           </Link>
-          <FormControlLabel
-            control={
-              <SwitchUI
-                checked={themeName === "light"}
-                onChange={toggleThemeName}
-              />
-            }
-            label="Light Mode"
-          />
+          {themeName === "light" ? (
+            <Brightness4 onClick={toggleThemeName} />
+          ) : (
+            <Brightness7 onClick={toggleThemeName} />
+          )}
           {user ? (
             <div>
               <IconButton
