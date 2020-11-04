@@ -33,14 +33,14 @@ const useStyles = makeStyles((theme) => ({
   title: {
     fontSize: 14,
   },
+  showBreaks: {
+    whiteSpace: "pre-line",
+  },
   pos: {
     marginBottom: 12,
   },
   commentForm: {
     marginTop: theme.spacing(1),
-    // display: "flex",
-    // flexDirection: "column",
-    // alignItems: "center",
   },
   form: {
     display: "flex",
@@ -124,28 +124,18 @@ const Posts: React.FC = ({}) => {
   const [newComment, setNewComment] = React.useState<string>("");
 
   const [
-    {
-      // data: createCommentData,
-      error: createCommentError,
-      loading: createCommentLoading,
-    },
-    {
-      // setData: setCreateCommentData,
-      setError: setCreateCommentError,
-      setLoading: setCreateCommentLoading,
-    },
+    { error: createCommentError, loading: createCommentLoading },
+    { setError: setCreateCommentError, setLoading: setCreateCommentLoading },
   ] = useFetch<CreateCommentResponse, CreateCommentError>({ loading: false });
 
   const postComment = async () => {
-    console.log("step 1", postID, accessToken);
     if (postID === "" || !accessToken) {
       return;
     }
     try {
-      console.log("trying");
       setCreateCommentLoading(true);
       setCreateCommentError(undefined);
-      const createCommentResponse = await forumAPI.createComment(
+      const _createCommentResponse = await forumAPI.createComment(
         {
           content: newComment,
           post: postID,
@@ -156,8 +146,8 @@ const Posts: React.FC = ({}) => {
       );
 
       // Some success alert
-      console.log(createCommentResponse.data);
       loadComments();
+      setNewComment("");
       alert("Your comment has been posted!");
     } catch (e) {
       const errorInfo = parseError<CreateCommentError>(e);
@@ -206,7 +196,11 @@ const Posts: React.FC = ({}) => {
                       comment.created_at
                     )}`}
                   </Typography>
-                  <Typography variant="body2" component="p">
+                  <Typography
+                    variant="body2"
+                    component="p"
+                    className={classes.showBreaks}
+                  >
                     {comment.content}
                   </Typography>
                 </CardContent>
