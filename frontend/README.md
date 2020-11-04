@@ -6,7 +6,7 @@ This is a react app that uses:
 - `yarn` v1.22.4 - package manager
 - `Next.JS` - framework for React.JS
 - `Typescript` - typed code is better than non-typed js. https://nextjs.org/learn/excel/typescript
-- `styled-components` for CSS in JS.
+
 
 ## Commands
 
@@ -27,16 +27,11 @@ Use the `<Link>` component to link between pages.
 
 ### Styling and Layout
 
-This project uses `styled-components` instead of raw CSS files.
+[Material-ui](https://material-ui.com/) is used as the base styling library.
 
-For base page templates/layouts, specify the layout component file in the `components` folder.
-
-[material-ui](https://material-ui.com/) is used as the base styling library.
-
-- https://github.com/vercel/next.js/tree/canary/examples/with-styled-components
 - https://github.com/mui-org/material-ui/tree/master/examples/nextjs-with-typescript
-- https://github.com/vercel/next.js/issues/4068
 - https://github.com/mui-org/material-ui/tree/master/examples/nextjs
+- https://nextjs.org/docs/advanced-features/custom-document
 
 ### APIs
 

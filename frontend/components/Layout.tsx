@@ -1,15 +1,19 @@
 // The base layout template for the site
 import React, { FunctionComponent } from "react";
 import Head from "next/head";
-import styled, { ThemeProvider } from "styled-components";
+import { makeStyles } from "@material-ui/core/styles";
 import { ThemeContext } from "../context/ThemeContext";
-import { ThemeProvider as MuiThemeProvider } from "@material-ui/core";
+import { ThemeProvider } from "@material-ui/core";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import getThemeByName from "../themes/themes";
 import NavBar from "./Navbar";
 
-// Spacer for the fixed navbar
-const PlaceholderDiv = styled.div({ marginBottom: "80px" });
+const useStyles = makeStyles((_theme) => ({
+  // Spacer for the fixed navbar
+  navpad: {
+    marginBottom: "80px",
+  },
+}));
 
 type LayoutProps = {
   title?: string;
@@ -19,6 +23,8 @@ const Layout: FunctionComponent<LayoutProps> = ({
   title = "React Django App",
   children,
 }) => {
+  const { themeName } = React.useContext(ThemeContext);
+  const classes = useStyles();
   return (
     <>
       {/* Specify HTML head fields here */}
@@ -31,19 +37,12 @@ const Layout: FunctionComponent<LayoutProps> = ({
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
       </Head>
-      <ThemeContext.Consumer>
-        {({ themeName }) => (
-          <MuiThemeProvider theme={getThemeByName(themeName)}>
-            <ThemeProvider theme={getThemeByName(themeName)}>
-              {/* TODO: remove? */}
-              <CssBaseline />
-              <NavBar />
-              <PlaceholderDiv />
-              <>{children}</>
-            </ThemeProvider>
-          </MuiThemeProvider>
-        )}
-      </ThemeContext.Consumer>
+      <ThemeProvider theme={getThemeByName(themeName)}>
+        <CssBaseline />
+        <NavBar />
+        <div className={classes.navpad} />
+        <>{children}</>
+      </ThemeProvider>
     </>
   );
 };
