@@ -31,6 +31,7 @@ Use the `<Link>` component to link between pages.
 
 - https://github.com/mui-org/material-ui/tree/master/examples/nextjs-with-typescript
 - https://github.com/mui-org/material-ui/tree/master/examples/nextjs
+https://nextjs.org/docs/advanced-features/custom-document
 
 ### APIs
 
