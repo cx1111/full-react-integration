@@ -1,5 +1,6 @@
 import { AxiosPromise } from "axios";
 import { API } from "./coreapi";
+import { SerializerError } from "./error";
 
 type Post = {
   id: string;
@@ -42,6 +43,23 @@ export type CreatePostResponse = Post;
 
 export type ListPostCommentsResponse = Comment[];
 
+export type CreateCommentParams = {
+  content: string;
+  post: string;
+  is_reply: boolean;
+  parent_comment: string | null;
+};
+
+export type CreateCommentResponse = {
+  id: string;
+  content: string;
+  // There are others...
+};
+
+export interface CreateCommentError extends SerializerError {
+  content?: string[];
+}
+
 class ForumAPI {
   viewPost = (postId: string): AxiosPromise<ViewPostResponse> =>
     API.request.get(`/api/post/${postId}`);
@@ -54,6 +72,16 @@ class ForumAPI {
 
   listPostComments = (postId: string): AxiosPromise<ListPostCommentsResponse> =>
     API.request.get(`/api/post/${postId}/comments/`);
+
+  createComment = (
+    params: CreateCommentParams,
+    accessToken: string
+  ): AxiosPromise<CreateCommentResponse> =>
+    API.request.post(
+      "/api/create-comment/",
+      { ...params },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
 }
 
 export const forumAPI = new ForumAPI();
