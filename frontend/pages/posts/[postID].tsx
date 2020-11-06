@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Typography } from "@material-ui/core";
-// import Divider from "@material-ui/core/Divider";
+import { remove } from "lodash";
 import Card from "@material-ui/core/Card";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import Link from "next/link";
 import CardContent from "@material-ui/core/CardContent";
+import CardActions from "@material-ui/core/CardActions";
 import { useFetch } from "../../hooks/useFetch";
 import {
   forumAPI,
@@ -22,9 +23,6 @@ import { displayDate } from "../../lib/utils/date";
 import { AuthContext } from "../../context/AuthContext";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    minWidth: 275,
-  },
   bullet: {
     display: "inline-block",
     margin: "0 2px",
@@ -39,8 +37,13 @@ const useStyles = makeStyles((theme) => ({
   pos: {
     marginBottom: 12,
   },
+  commentCard: {
+    minWidth: 275,
+    marginBottom: theme.spacing(2),
+  },
   commentForm: {
     marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
   },
   form: {
     display: "flex",
@@ -121,6 +124,22 @@ const Posts: React.FC = ({}) => {
     loadComments();
   }, [loadComments]);
 
+  // List of comment ids that are set to show replies
+  const [showReplies, setShowReplies] = React.useState<string[]>([]);
+
+  const toggleShowReply = (commentId: string) => {
+    setShowReplies((prevShowReplies) => {
+      if (prevShowReplies.includes(commentId)) {
+        const newShowReplies = remove(
+          prevShowReplies,
+          (el: string) => el !== commentId
+        );
+        return newShowReplies;
+      }
+      return [...prevShowReplies, commentId];
+    });
+  };
+  // For leaving a new comment
   const [newComment, setNewComment] = React.useState<string>("");
 
   const [
@@ -184,30 +203,58 @@ const Posts: React.FC = ({}) => {
             <hr />
           </>
         )}
-        {commentsLoading && <p>Loading comments...</p>}
-        {commentsError && <p>Error loading comments: {commentsError}</p>}
-        {commentsData && (
-          <>
-            {commentsData.map((comment) => (
-              <Card className={classes.root} key={comment.id}>
-                <CardContent>
-                  <Typography className={classes.pos} color="textSecondary">
-                    {`${comment.author.username} - ${displayDate(
-                      comment.created_at
-                    )}`}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    component="p"
-                    className={classes.showBreaks}
-                  >
-                    {comment.content}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </>
-        )}
+        {/* Comments section */}
+        <div>
+          <Typography component={"h2"} variant={"h3"}>
+            Comments
+          </Typography>
+          {commentsLoading && <p>Loading comments...</p>}
+          {commentsError && <p>Error loading comments: {commentsError}</p>}
+          {commentsData && (
+            <>
+              {commentsData.map((comment) => (
+                <Card className={classes.commentCard} key={comment.id}>
+                  <CardContent>
+                    <Typography className={classes.pos} color="textSecondary">
+                      {`${comment.author.username} - ${displayDate(
+                        comment.created_at
+                      )} - ${comment.id}`}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      component="p"
+                      className={classes.showBreaks}
+                    >
+                      {comment.content}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size="small" color="primary">
+                      Share
+                    </Button>
+                    <Button size="small" color="primary">
+                      Reply
+                    </Button>
+                    <Button
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        toggleShowReply(comment.id);
+                      }}
+                    >
+                      {comment.num_replies} Replies
+                    </Button>
+                    {showReplies.includes(comment.id) && (
+                      <Button size="small" color="primary">
+                        Showing!
+                      </Button>
+                    )}
+                  </CardActions>
+                </Card>
+              ))}
+            </>
+          )}
+        </div>
         <div className={classes.commentForm}>
           {accessToken ? (
             <form className={classes.form}>
@@ -241,7 +288,9 @@ const Posts: React.FC = ({}) => {
               </Button>
             </form>
           ) : (
-            <>Log in to comment</>
+            <>
+              <Link href={"/login"}>Log in</Link> to comment
+            </>
           )}
         </div>
       </Container>

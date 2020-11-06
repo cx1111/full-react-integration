@@ -14,9 +14,13 @@ class Post(models.Model):
 class Comment(models.Model):
     content = models.TextField(max_length=1000)
     is_reply = models.BooleanField()
-    parent_comment = models.ForeignKey('forum.Comment', blank=True, null=True, on_delete=models.CASCADE, related_name='replies')
-    post = models.ForeignKey('forum.Post', on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='comments')
+    parent_comment = models.ForeignKey(
+        'forum.Comment', blank=True, null=True, on_delete=models.CASCADE, related_name='replies')
+    num_replies = models.PositiveSmallIntegerField(default=0)
+    post = models.ForeignKey(
+        'forum.Post', on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(
+        'user.User', on_delete=models.CASCADE, related_name='comments')
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(blank=True, null=True)
 
@@ -27,7 +31,8 @@ class Comment(models.Model):
 class Vote(models.Model):
     # 0 = up, 1 = down
     vote_type = models.PositiveSmallIntegerField()
-    comment = models.ForeignKey('forum.Comment', null=True, on_delete=models.CASCADE)
+    comment = models.ForeignKey(
+        'forum.Comment', null=True, on_delete=models.CASCADE)
     author = models.ForeignKey('user.User', on_delete=models.CASCADE)
 
     class Meta:

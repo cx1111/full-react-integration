@@ -17,6 +17,7 @@ type Comment = {
   content: string;
   post: string;
   parent_comment: string | null;
+  num_replies: number;
   author: {
     username: string;
   };

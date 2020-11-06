@@ -32,9 +32,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'content', 'post', 'parent_comment',
+        fields = ('id', 'content', 'post', 'parent_comment', 'num_replies',
                   'author', 'created_at', 'edited_at')
-        read_only_fields = ('id', 'post', 'parent_comment',
+        read_only_fields = ('id', 'post', 'parent_comment', 'num_replies',
                             'author', 'created_at', 'edited_at')
 
     def update(self, instance, validated_data):
