@@ -51,6 +51,12 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
     alignItems: "left",
   },
+  repliesSection: {
+    display: "flex",
+    flexDirection: "column",
+    marginLeft: theme.spacing(10),
+    width: "500px",
+  },
 }));
 
 const Posts: React.FC = ({}) => {
@@ -242,14 +248,39 @@ const Posts: React.FC = ({}) => {
                         toggleShowReply(comment.id);
                       }}
                     >
-                      {comment.num_replies} Replies
+                      {showReplies.includes(comment.id)
+                        ? "Hide Replies"
+                        : `${comment.num_replies} Replies`}
                     </Button>
-                    {showReplies.includes(comment.id) && (
-                      <Button size="small" color="primary">
-                        Showing!
-                      </Button>
-                    )}
                   </CardActions>
+                  {/* Replies */}
+                  {showReplies.includes(comment.id) && (
+                    <CardActions>
+                      <div className={classes.repliesSection}>
+                        {[1, 2, 3].map((el) => (
+                          <Card key={el} className={classes.commentCard}>
+                            <CardContent>
+                              <Typography
+                                className={classes.pos}
+                                color="textSecondary"
+                              >
+                                {`${comment.author.username} - ${displayDate(
+                                  comment.created_at
+                                )} - ${comment.id}`}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                component="p"
+                                className={classes.showBreaks}
+                              >
+                                This is a good reply
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardActions>
+                  )}
                 </Card>
               ))}
             </>
