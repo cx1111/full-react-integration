@@ -71,4 +71,10 @@ class CreateCommentSerializer(serializers.ModelSerializer):
         if not data['is_reply'] and data.get('parent_comment') is not None:
             raise serializers.ValidationError(
                 'parent_comment should not be specified for a non-reply comment')
+
+        if data['is_reply'] and data.get('parent_comment'):
+            if data['post'] != data['parent_comment'].post:
+                raise serializers.ValidationError(
+                    'Post belonging to parent_comment does not match provided post')
+
         return data

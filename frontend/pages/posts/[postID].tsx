@@ -145,7 +145,11 @@ const Posts: React.FC = ({}) => {
       return [...prevShowReplies, commentId];
     });
   };
+
   // For leaving a new comment
+  const [newReply, setNewReply] = React.useState<string>("");
+
+  // For leaving a new top-level comment
   const [newComment, setNewComment] = React.useState<string>("");
 
   const [
@@ -153,7 +157,7 @@ const Posts: React.FC = ({}) => {
     { setError: setCreateCommentError, setLoading: setCreateCommentLoading },
   ] = useFetch<CreateCommentResponse, CreateCommentError>({ loading: false });
 
-  const postComment = async () => {
+  const postComment = async (content: string, parentComment: string | null) => {
     if (postID === "" || !accessToken) {
       return;
     }
@@ -162,10 +166,10 @@ const Posts: React.FC = ({}) => {
       setCreateCommentError(undefined);
       const _createCommentResponse = await forumAPI.createComment(
         {
-          content: newComment,
+          content,
           post: postID,
-          is_reply: false,
-          parent_comment: null,
+          is_reply: Boolean(parentComment),
+          parent_comment: parentComment,
         },
         accessToken
       );
@@ -278,6 +282,42 @@ const Posts: React.FC = ({}) => {
                             </CardContent>
                           </Card>
                         ))}
+                        <div className={classes.commentForm}>
+                          {accessToken ? (
+                            <form className={classes.form}>
+                              <TextField
+                                multiline
+                                rows={4}
+                                value={newReply}
+                                onChange={(e) => setNewReply(e.target.value)}
+                                required
+                                variant="outlined"
+                                margin="normal"
+                              />
+                              {createCommentError?.non_field_errors && (
+                                <Typography color={"error"}>
+                                  {createCommentError.non_field_errors[0]}
+                                </Typography>
+                              )}
+                              <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  postComment(newReply, comment.id);
+                                }}
+                                disabled={createCommentLoading}
+                              >
+                                Post Reply
+                              </Button>
+                            </form>
+                          ) : (
+                            <>
+                              <Link href={"/login"}>Log in</Link> to comment
+                            </>
+                          )}
+                        </div>
                       </div>
                     </CardActions>
                   )}
@@ -311,7 +351,7 @@ const Posts: React.FC = ({}) => {
                 // className={classes.submit}
                 onClick={(e) => {
                   e.preventDefault();
-                  postComment();
+                  postComment(newComment, null);
                 }}
                 disabled={createCommentLoading}
               >
