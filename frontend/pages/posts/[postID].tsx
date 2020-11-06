@@ -177,6 +177,7 @@ const Posts: React.FC = ({}) => {
       // Some success alert
       loadComments();
       setNewComment("");
+      setNewReply("");
       alert("Your comment has been posted!");
     } catch (e) {
       const errorInfo = parseError<CreateCommentError>(e);

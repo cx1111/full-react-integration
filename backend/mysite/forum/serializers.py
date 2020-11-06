@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db import transaction
 from rest_framework import serializers
 
 from forum.models import Post, Comment
@@ -78,3 +79,19 @@ class CreateCommentSerializer(serializers.ModelSerializer):
                     'Post belonging to parent_comment does not match provided post')
 
         return data
+
+    def create(self, validated_data):
+        """
+        Create a new comment
+        """
+        with transaction.atomic():
+            comment = super(CreateCommentSerializer,
+                            self).create(validated_data)
+            comment.post.num_comments += 1
+            comment.post.save()
+
+            if comment.parent_comment:
+                comment.parent_comment.num_replies += 1
+                comment.parent_comment.save()
+
+        return comment
