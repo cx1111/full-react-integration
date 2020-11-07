@@ -24,11 +24,6 @@ import { displayDate } from "../../lib/utils/date";
 import { AuthContext } from "../../context/AuthContext";
 
 const useStyles = makeStyles((theme) => ({
-  bullet: {
-    display: "inline-block",
-    margin: "0 2px",
-    transform: "scale(0.8)",
-  },
   title: {
     fontSize: 14,
   },
@@ -42,6 +37,20 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 275,
     marginBottom: theme.spacing(2),
   },
+  repliesSection: {
+    display: "flex",
+    flexDirection: "column",
+    marginLeft: theme.spacing(10),
+    width: "500px",
+    // paddingTop: "0px",
+    marginTop: "0px",
+  },
+  replyForm: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+  },
   commentForm: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(2),
@@ -50,13 +59,6 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     marginTop: theme.spacing(1),
-    alignItems: "left",
-  },
-  repliesSection: {
-    display: "flex",
-    flexDirection: "column",
-    marginLeft: theme.spacing(10),
-    width: "500px",
   },
 }));
 
@@ -260,7 +262,7 @@ const Posts: React.FC = ({}) => {
                     <Typography className={classes.pos} color="textSecondary">
                       {`${comment.author.username} - ${displayDate(
                         comment.created_at
-                      )} - ${comment.id}`}
+                      )}`}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -274,9 +276,17 @@ const Posts: React.FC = ({}) => {
                     <Button size="small" color="primary">
                       Share
                     </Button>
-                    <Button size="small" color="primary">
-                      Reply
-                    </Button>
+                    {accessToken && (
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          toggleShowReply(comment.id);
+                        }}
+                      >
+                        Reply
+                      </Button>
+                    )}
                     {Boolean(comment.num_replies) && (
                       <Button
                         size="small"
@@ -287,7 +297,9 @@ const Posts: React.FC = ({}) => {
                       >
                         {showReplies.includes(comment.id)
                           ? "Hide Replies"
-                          : `${comment.num_replies} Replies`}
+                          : `${comment.num_replies} ${
+                              comment.num_replies > 1 ? "Replies" : "Reply"
+                            }`}
                       </Button>
                     )}
                   </CardActions>
@@ -295,6 +307,41 @@ const Posts: React.FC = ({}) => {
                   {showReplies.includes(comment.id) && replies[comment.id] && (
                     <CardActions>
                       <div className={classes.repliesSection}>
+                        {/* Reply form */}
+                        {accessToken ? (
+                          <form className={classes.replyForm}>
+                            <TextField
+                              multiline
+                              rows={4}
+                              value={newReply}
+                              onChange={(e) => setNewReply(e.target.value)}
+                              required
+                              variant="outlined"
+                              margin="normal"
+                            />
+                            {createCommentError?.non_field_errors && (
+                              <Typography color={"error"}>
+                                {createCommentError.non_field_errors[0]}
+                              </Typography>
+                            )}
+                            <Button
+                              type="submit"
+                              variant="contained"
+                              color="primary"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                postComment(newReply, comment.id);
+                              }}
+                              disabled={createCommentLoading}
+                            >
+                              Post Reply
+                            </Button>
+                          </form>
+                        ) : (
+                          <p>
+                            <Link href={"/login"}>Log in</Link> to comment
+                          </p>
+                        )}
                         {replies[comment.id].map((reply) => (
                           <Card key={reply.id} className={classes.commentCard}>
                             <CardContent>
@@ -304,7 +351,7 @@ const Posts: React.FC = ({}) => {
                               >
                                 {`${reply.author.username} - ${displayDate(
                                   reply.created_at
-                                )} - ${reply.id}`}
+                                )}`}
                               </Typography>
                               <Typography
                                 variant="body2"
@@ -316,42 +363,6 @@ const Posts: React.FC = ({}) => {
                             </CardContent>
                           </Card>
                         ))}
-                        <div className={classes.commentForm}>
-                          {accessToken ? (
-                            <form className={classes.form}>
-                              <TextField
-                                multiline
-                                rows={4}
-                                value={newReply}
-                                onChange={(e) => setNewReply(e.target.value)}
-                                required
-                                variant="outlined"
-                                margin="normal"
-                              />
-                              {createCommentError?.non_field_errors && (
-                                <Typography color={"error"}>
-                                  {createCommentError.non_field_errors[0]}
-                                </Typography>
-                              )}
-                              <Button
-                                type="submit"
-                                variant="contained"
-                                color="primary"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  postComment(newReply, comment.id);
-                                }}
-                                disabled={createCommentLoading}
-                              >
-                                Post Reply
-                              </Button>
-                            </form>
-                          ) : (
-                            <>
-                              <Link href={"/login"}>Log in</Link> to comment
-                            </>
-                          )}
-                        </div>
                       </div>
                     </CardActions>
                   )}
