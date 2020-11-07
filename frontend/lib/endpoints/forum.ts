@@ -40,6 +40,11 @@ export type CreatePostParams = {
   title: string;
 };
 
+export interface CreatePostError extends SerializerError {
+  title?: string[];
+  identifier?: string[];
+}
+
 export type CreatePostResponse = Post;
 
 export type ListPostCommentsResponse = Comment[];
