@@ -1,18 +1,17 @@
 import React from "react";
+import { useRouter } from "next/router";
 import { makeStyles } from "@material-ui/core/styles";
 import Layout from "../../components/Layout";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
-import Link from "next/link";
 import { Container, Typography } from "@material-ui/core";
-import { useMutation, MutationFunction } from "react-query";
 import {
   forumAPI,
-  CreatePostParams,
   CreatePostResponse,
   CreatePostError,
 } from "../../lib/endpoints/forum";
-import { parseError } from "../../lib/endpoints/error";
+import { useFetch } from "../../hooks/useFetch";
+import { isDefaultError, parseError } from "../../lib/endpoints/error";
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -25,28 +24,38 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const NewPost: React.FC = ({}) => {
+  const router = useRouter();
   const classes = useStyles();
 
   const [title, setTitle] = React.useState("");
   const [identifier, setIdentifier] = React.useState("");
 
-  const [a] = useMutation;
+  const [
+    { error: createPostError, loading: createPostLoading },
+    { setError: setCreatePostError, setLoading: setCreatePostLoading },
+  ] = useFetch<CreatePostResponse, CreatePostError>({ loading: false });
 
-  const [addTodo, { status, data, error }] = useMutation<
-    Promise<CreatePostResponse>,
-    CreatePostError,
-    CreatePostParams
-  >(
-    async (params: CreatePostParams) => {
-      const x = forumAPI.createPost(params).then((res) => res.data);
-      return x;
-    },
-    {
-      onSuccess: () => {
-        alert("yay");
-      },
+  const attemptCreatePost = async () => {
+    try {
+      setCreatePostLoading(true);
+      setCreatePostError(undefined);
+      const response = await forumAPI.createPost({
+        title,
+        identifier,
+      });
+
+      router.push(`/posts/${response.data.id}`);
+    } catch (e) {
+      const errorInfo = parseError<CreatePostError>(e);
+      if (isDefaultError(errorInfo)) {
+        setCreatePostError({ non_field_errors: [errorInfo.detail] });
+      } else {
+        setCreatePostError(errorInfo);
+      }
+    } finally {
+      setCreatePostLoading(false);
     }
-  );
+  };
 
   return (
     <Layout>
@@ -56,8 +65,8 @@ const NewPost: React.FC = ({}) => {
         </Typography>
         <form className={classes.form} noValidate>
           <TextField
-            // helperText={loginError?.username ? loginError.username[0] : ""}
-            // error={Boolean(loginError?.username)}
+            helperText={createPostError?.title ? createPostError.title[0] : ""}
+            error={Boolean(createPostError?.title)}
             variant="outlined"
             margin="normal"
             required
@@ -68,8 +77,10 @@ const NewPost: React.FC = ({}) => {
             onChange={(e) => setTitle(e.target.value)}
           />
           <TextField
-            // helperText={loginError?.username ? loginError.username[0] : ""}
-            // error={Boolean(loginError?.username)}
+            helperText={
+              createPostError?.identifier ? createPostError.identifier[0] : ""
+            }
+            error={Boolean(createPostError?.identifier)}
             variant="outlined"
             margin="normal"
             required
@@ -78,6 +89,11 @@ const NewPost: React.FC = ({}) => {
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
           />
+          {createPostError?.non_field_errors && (
+            <Typography color={"error"}>
+              {createPostError.non_field_errors[0]}
+            </Typography>
+          )}
           <Button
             fullWidth
             type="submit"
@@ -86,9 +102,9 @@ const NewPost: React.FC = ({}) => {
             className={classes.submit}
             onClick={(e) => {
               e.preventDefault();
-              //   attemptLogin();
+              attemptCreatePost();
             }}
-            // disabled={loginLoading}
+            disabled={createPostLoading}
           >
             Create new post
           </Button>
