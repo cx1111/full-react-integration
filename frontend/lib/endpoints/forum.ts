@@ -33,6 +33,14 @@ export type ListPostsParams = {
 // Response data
 export type ListPostsResponse = Post[];
 
+export type CheckPostExistsParams = {
+  identifier: string;
+};
+
+export type CheckPostExistsResponse = {
+  post: Post | null;
+};
+
 export type ViewPostResponse = Post;
 
 export type CreatePostParams = {
@@ -72,13 +80,25 @@ class ForumAPI {
   viewPost = (postId: string): AxiosPromise<ViewPostResponse> =>
     API.request.get(`/api/post/${postId}`);
 
-  createPost = (params: CreatePostParams): AxiosPromise<CreatePostResponse> =>
-    API.request.post("/api/create-post/", { params });
+  createPost = (
+    params: CreatePostParams,
+    accessToken: string
+  ): AxiosPromise<CreatePostResponse> =>
+    API.request.post(
+      "/api/create-post/",
+      { ...params },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
 
   listPosts = (params?: ListPostsParams): AxiosPromise<ListPostsResponse> =>
     API.request.get("/api/posts/", { params });
 
-  // Top level comments
+  checkPostExists = (
+    params?: CheckPostExistsParams
+  ): AxiosPromise<CheckPostExistsResponse> =>
+    API.request.get("/api/post-exists/", { params });
+
+  // List top-level comments
   listPostComments = (postId: string): AxiosPromise<ListPostCommentsResponse> =>
     API.request.get(`/api/post/${postId}/comments/`);
 
