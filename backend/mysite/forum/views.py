@@ -90,7 +90,6 @@ class CommentRepliesViewSet(APIView):
     """
 
     def get(self, request, pk):
-        # return Response('aeoifjoiaejf', status=500)
         try:
             original_comment = Comment.objects.get(pk=pk)
         except (ValueError, Comment.DoesNotExist):

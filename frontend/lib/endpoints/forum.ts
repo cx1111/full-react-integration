@@ -17,6 +17,7 @@ type Comment = {
   content: string;
   post: string;
   parent_comment: string | null;
+  num_replies: number;
   author: {
     username: string;
   };
@@ -42,6 +43,8 @@ export type CreatePostParams = {
 export type CreatePostResponse = Post;
 
 export type ListPostCommentsResponse = Comment[];
+
+export type ListCommentRepliesResponse = Comment[];
 
 export type CreateCommentParams = {
   content: string;
@@ -70,8 +73,14 @@ class ForumAPI {
   listPosts = (params?: ListPostsParams): AxiosPromise<ListPostsResponse> =>
     API.request.get("/api/posts/", { params });
 
+  // Top level comments
   listPostComments = (postId: string): AxiosPromise<ListPostCommentsResponse> =>
     API.request.get(`/api/post/${postId}/comments/`);
+
+  listCommentReplies = (
+    commentId: string
+  ): AxiosPromise<ListCommentRepliesResponse> =>
+    API.request.get(`/api/comment/${commentId}/replies/`);
 
   createComment = (
     params: CreateCommentParams,

@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Typography } from "@material-ui/core";
-// import Divider from "@material-ui/core/Divider";
+import { remove } from "lodash";
 import Card from "@material-ui/core/Card";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -9,11 +9,13 @@ import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import Link from "next/link";
 import CardContent from "@material-ui/core/CardContent";
+import CardActions from "@material-ui/core/CardActions";
 import { useFetch } from "../../hooks/useFetch";
 import {
   forumAPI,
   ViewPostResponse,
   ListPostCommentsResponse,
+  ListCommentRepliesResponse,
   CreateCommentResponse,
   CreateCommentError,
 } from "../../lib/endpoints/forum";
@@ -22,14 +24,6 @@ import { displayDate } from "../../lib/utils/date";
 import { AuthContext } from "../../context/AuthContext";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    minWidth: 275,
-  },
-  bullet: {
-    display: "inline-block",
-    margin: "0 2px",
-    transform: "scale(0.8)",
-  },
   title: {
     fontSize: 14,
   },
@@ -39,14 +33,33 @@ const useStyles = makeStyles((theme) => ({
   pos: {
     marginBottom: 12,
   },
+  commentCard: {
+    minWidth: 275,
+    marginBottom: theme.spacing(2),
+  },
+  repliesSection: {
+    display: "flex",
+    flexDirection: "column",
+    marginLeft: theme.spacing(10),
+    width: "500px",
+  },
+  replyForm: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+  },
   commentForm: {
     marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
   },
   form: {
     display: "flex",
     flexDirection: "column",
     marginTop: theme.spacing(1),
-    alignItems: "left",
+  },
+  fixedButton: {
+    width: "120px",
   },
 }));
 
@@ -66,6 +79,7 @@ const Posts: React.FC = ({}) => {
     },
   ] = useFetch<ViewPostResponse>({ loading: false });
 
+  // Top-level comments
   const [
     { data: commentsData, error: commentsError, loading: commentsLoading },
     {
@@ -74,6 +88,24 @@ const Posts: React.FC = ({}) => {
       setLoading: setCommentsLoading,
     },
   ] = useFetch<ListPostCommentsResponse>({ loading: false });
+
+  // Comment replies object/dictionary
+  const [replies, setReplies] = React.useState<
+    Record<string, ListCommentRepliesResponse>
+  >({});
+
+  // Load replies for a post
+  const loadReplies = async (commentId: string) => {
+    try {
+      const repliesResponse = await forumAPI.listCommentReplies(commentId);
+      setReplies((prevReplies) => ({
+        ...prevReplies,
+        [commentId]: repliesResponse.data,
+      }));
+    } catch (e) {
+      console.log("Failed to get replies", e);
+    }
+  };
 
   React.useEffect(() => {
     // TODO: 404 page?
@@ -121,6 +153,41 @@ const Posts: React.FC = ({}) => {
     loadComments();
   }, [loadComments]);
 
+  // List of comment ids that are set to show replies
+  // TODO: convert to dict
+  const [showReplies, setShowReplies] = React.useState<string[]>([]);
+
+  // Id of comment to focus reply comment field
+  const [focusReply, setFocusReply] = React.useState<string | null>(null);
+
+  // Set the status of showing replies to a comment
+  const setShowReply = (commentId: string, status: boolean) => {
+    // Show
+    if (status) {
+      if (!replies[commentId]) {
+        loadReplies(commentId);
+      }
+      setShowReplies((prevShowReplies) => [...prevShowReplies, commentId]);
+    }
+    // Hide
+    else {
+      setFocusReply(null);
+      setShowReplies((prevShowReplies) => {
+        const newShowReplies = remove(
+          prevShowReplies,
+          (el: string) => el !== commentId
+        );
+        return newShowReplies;
+      });
+    }
+  };
+
+  // Dictionary of text fields for new replies. Key is parent comment id.
+  const [newReplies, setNewReplies] = React.useState<Record<string, string>>(
+    {}
+  );
+
+  // For leaving a new top-level comment
   const [newComment, setNewComment] = React.useState<string>("");
 
   const [
@@ -128,7 +195,7 @@ const Posts: React.FC = ({}) => {
     { setError: setCreateCommentError, setLoading: setCreateCommentLoading },
   ] = useFetch<CreateCommentResponse, CreateCommentError>({ loading: false });
 
-  const postComment = async () => {
+  const postComment = async (content: string, parentComment: string | null) => {
     if (postID === "" || !accessToken) {
       return;
     }
@@ -137,17 +204,22 @@ const Posts: React.FC = ({}) => {
       setCreateCommentError(undefined);
       const _createCommentResponse = await forumAPI.createComment(
         {
-          content: newComment,
+          content,
           post: postID,
-          is_reply: false,
-          parent_comment: null,
+          is_reply: Boolean(parentComment),
+          parent_comment: parentComment,
         },
         accessToken
       );
 
-      // Some success alert
+      if (parentComment) {
+        loadReplies(parentComment);
+      }
+      // Always refresh top level comments. TODO: make robust to pagination.
       loadComments();
       setNewComment("");
+      // setNewReply("");
+      setNewReplies({});
       alert("Your comment has been posted!");
     } catch (e) {
       const errorInfo = parseError<CreateCommentError>(e);
@@ -184,30 +256,143 @@ const Posts: React.FC = ({}) => {
             <hr />
           </>
         )}
-        {commentsLoading && <p>Loading comments...</p>}
-        {commentsError && <p>Error loading comments: {commentsError}</p>}
-        {commentsData && (
-          <>
-            {commentsData.map((comment) => (
-              <Card className={classes.root} key={comment.id}>
-                <CardContent>
-                  <Typography className={classes.pos} color="textSecondary">
-                    {`${comment.author.username} - ${displayDate(
-                      comment.created_at
-                    )}`}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    component="p"
-                    className={classes.showBreaks}
-                  >
-                    {comment.content}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </>
-        )}
+        {/* Comments section */}
+        <div>
+          <Typography component={"h2"} variant={"h3"}>
+            Comments
+          </Typography>
+          {commentsLoading && <p>Loading comments...</p>}
+          {commentsError && <p>Error loading comments: {commentsError}</p>}
+          {commentsData && (
+            <>
+              {commentsData.map((comment) => (
+                <Card className={classes.commentCard} key={comment.id}>
+                  <CardContent>
+                    <Typography className={classes.pos} color="textSecondary">
+                      {`${comment.author.username} - ${displayDate(
+                        comment.created_at
+                      )}`}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      component="p"
+                      className={classes.showBreaks}
+                    >
+                      {comment.content}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size="small" color="primary">
+                      Share
+                    </Button>
+                    {accessToken && (
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          setShowReply(comment.id, true);
+                          setFocusReply(comment.id);
+                        }}
+                      >
+                        Reply
+                      </Button>
+                    )}
+                    {Boolean(comment.num_replies) && (
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          setShowReply(
+                            comment.id,
+                            !showReplies.includes(comment.id)
+                          );
+                        }}
+                      >
+                        {showReplies.includes(comment.id)
+                          ? "Hide Replies"
+                          : `${comment.num_replies} ${
+                              comment.num_replies > 1 ? "Replies" : "Reply"
+                            }`}
+                      </Button>
+                    )}
+                  </CardActions>
+                  {/* Replies */}
+                  {showReplies.includes(comment.id) && replies[comment.id] && (
+                    <CardActions>
+                      <div className={classes.repliesSection}>
+                        {/* Reply form */}
+                        {accessToken ? (
+                          <form className={classes.replyForm}>
+                            <TextField
+                              multiline
+                              rows={4}
+                              value={newReplies[comment.id] || ""}
+                              onChange={(e) =>
+                                setNewReplies({
+                                  ...newReplies,
+                                  [comment.id]: e.target.value,
+                                })
+                              }
+                              required
+                              autoFocus={focusReply === comment.id}
+                              variant="outlined"
+                              margin="normal"
+                            />
+                            {createCommentError?.non_field_errors && (
+                              <Typography color={"error"}>
+                                {createCommentError.non_field_errors[0]}
+                              </Typography>
+                            )}
+                            <Button
+                              type="submit"
+                              variant="contained"
+                              color="primary"
+                              classes={{
+                                root: classes.fixedButton,
+                              }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                postComment(newReplies[comment.id], comment.id);
+                              }}
+                              disabled={createCommentLoading}
+                            >
+                              Post Reply
+                            </Button>
+                          </form>
+                        ) : (
+                          <p>
+                            <Link href={"/login"}>Log in</Link> to comment
+                          </p>
+                        )}
+                        {replies[comment.id].map((reply) => (
+                          <Card key={reply.id} className={classes.commentCard}>
+                            <CardContent>
+                              <Typography
+                                className={classes.pos}
+                                color="textSecondary"
+                              >
+                                {`${reply.author.username} - ${displayDate(
+                                  reply.created_at
+                                )}`}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                component="p"
+                                className={classes.showBreaks}
+                              >
+                                {reply.content}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardActions>
+                  )}
+                </Card>
+              ))}
+            </>
+          )}
+        </div>
         <div className={classes.commentForm}>
           {accessToken ? (
             <form className={classes.form}>
@@ -226,14 +411,12 @@ const Posts: React.FC = ({}) => {
                 </Typography>
               )}
               <Button
-                // fullWidth={false}
                 type="submit"
                 variant="contained"
                 color="primary"
-                // className={classes.submit}
                 onClick={(e) => {
                   e.preventDefault();
-                  postComment();
+                  postComment(newComment, null);
                 }}
                 disabled={createCommentLoading}
               >
@@ -241,7 +424,9 @@ const Posts: React.FC = ({}) => {
               </Button>
             </form>
           ) : (
-            <>Log in to comment</>
+            <>
+              <Link href={"/login"}>Log in</Link> to comment
+            </>
           )}
         </div>
       </Container>

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db import transaction
 from rest_framework import serializers
 
 from forum.models import Post, Comment
@@ -32,9 +33,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'content', 'post', 'parent_comment',
+        fields = ('id', 'content', 'post', 'parent_comment', 'num_replies',
                   'author', 'created_at', 'edited_at')
-        read_only_fields = ('id', 'post', 'parent_comment',
+        read_only_fields = ('id', 'post', 'parent_comment', 'num_replies',
                             'author', 'created_at', 'edited_at')
 
     def update(self, instance, validated_data):
@@ -71,4 +72,26 @@ class CreateCommentSerializer(serializers.ModelSerializer):
         if not data['is_reply'] and data.get('parent_comment') is not None:
             raise serializers.ValidationError(
                 'parent_comment should not be specified for a non-reply comment')
+
+        if data['is_reply'] and data.get('parent_comment'):
+            if data['post'] != data['parent_comment'].post:
+                raise serializers.ValidationError(
+                    'Post belonging to parent_comment does not match provided post')
+
         return data
+
+    def create(self, validated_data):
+        """
+        Create a new comment
+        """
+        with transaction.atomic():
+            comment = super(CreateCommentSerializer,
+                            self).create(validated_data)
+            comment.post.num_comments += 1
+            comment.post.save()
+
+            if comment.parent_comment:
+                comment.parent_comment.num_replies += 1
+                comment.parent_comment.save()
+
+        return comment
