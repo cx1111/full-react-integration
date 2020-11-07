@@ -42,8 +42,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     marginLeft: theme.spacing(10),
     width: "500px",
-    // paddingTop: "0px",
-    marginTop: "0px",
   },
   replyForm: {
     display: "flex",
@@ -156,24 +154,29 @@ const Posts: React.FC = ({}) => {
   // TODO: convert to dict
   const [showReplies, setShowReplies] = React.useState<string[]>([]);
 
-  const toggleShowReply = (commentId: string) => {
-    // Load replies if necessary
-    if (!showReplies.includes(commentId) && !replies[commentId]) {
-      loadReplies(commentId);
-    }
+  // Id of comment to focus reply comment field
+  const [focusReply, setFocusReply] = React.useState<string | null>(null);
 
-    setShowReplies((prevShowReplies) => {
-      // Hide replies
-      if (prevShowReplies.includes(commentId)) {
+  // Set the status of showing replies to a comment
+  const setShowReply = (commentId: string, status: boolean) => {
+    // Show
+    if (status) {
+      if (!replies[commentId]) {
+        loadReplies(commentId);
+      }
+      setShowReplies((prevShowReplies) => [...prevShowReplies, commentId]);
+    }
+    // Hide
+    else {
+      setFocusReply(null);
+      setShowReplies((prevShowReplies) => {
         const newShowReplies = remove(
           prevShowReplies,
           (el: string) => el !== commentId
         );
         return newShowReplies;
-      }
-      // Show replies
-      return [...prevShowReplies, commentId];
-    });
+      });
+    }
   };
 
   // For leaving a new comment
@@ -281,7 +284,8 @@ const Posts: React.FC = ({}) => {
                         size="small"
                         color="primary"
                         onClick={() => {
-                          toggleShowReply(comment.id);
+                          setShowReply(comment.id, true);
+                          setFocusReply(comment.id);
                         }}
                       >
                         Reply
@@ -292,7 +296,10 @@ const Posts: React.FC = ({}) => {
                         size="small"
                         color="primary"
                         onClick={() => {
-                          toggleShowReply(comment.id);
+                          setShowReply(
+                            comment.id,
+                            !showReplies.includes(comment.id)
+                          );
                         }}
                       >
                         {showReplies.includes(comment.id)
@@ -316,6 +323,7 @@ const Posts: React.FC = ({}) => {
                               value={newReply}
                               onChange={(e) => setNewReply(e.target.value)}
                               required
+                              autoFocus={focusReply === comment.id}
                               variant="outlined"
                               margin="normal"
                             />
