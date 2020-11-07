@@ -58,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     marginTop: theme.spacing(1),
   },
+  fixedButton: {
+    width: "120px",
+  },
 }));
 
 const Posts: React.FC = ({}) => {
@@ -179,8 +182,10 @@ const Posts: React.FC = ({}) => {
     }
   };
 
-  // For leaving a new comment
-  const [newReply, setNewReply] = React.useState<string>("");
+  // Dictionary of text fields for new replies. Key is parent comment id.
+  const [newReplies, setNewReplies] = React.useState<Record<string, string>>(
+    {}
+  );
 
   // For leaving a new top-level comment
   const [newComment, setNewComment] = React.useState<string>("");
@@ -213,7 +218,8 @@ const Posts: React.FC = ({}) => {
       // Always refresh top level comments. TODO: make robust to pagination.
       loadComments();
       setNewComment("");
-      setNewReply("");
+      // setNewReply("");
+      setNewReplies({});
       alert("Your comment has been posted!");
     } catch (e) {
       const errorInfo = parseError<CreateCommentError>(e);
@@ -320,8 +326,13 @@ const Posts: React.FC = ({}) => {
                             <TextField
                               multiline
                               rows={4}
-                              value={newReply}
-                              onChange={(e) => setNewReply(e.target.value)}
+                              value={newReplies[comment.id] || ""}
+                              onChange={(e) =>
+                                setNewReplies({
+                                  ...newReplies,
+                                  [comment.id]: e.target.value,
+                                })
+                              }
                               required
                               autoFocus={focusReply === comment.id}
                               variant="outlined"
@@ -336,9 +347,12 @@ const Posts: React.FC = ({}) => {
                               type="submit"
                               variant="contained"
                               color="primary"
+                              classes={{
+                                root: classes.fixedButton,
+                              }}
                               onClick={(e) => {
                                 e.preventDefault();
-                                postComment(newReply, comment.id);
+                                postComment(newReplies[comment.id], comment.id);
                               }}
                               disabled={createCommentLoading}
                             >
@@ -397,11 +411,9 @@ const Posts: React.FC = ({}) => {
                 </Typography>
               )}
               <Button
-                // fullWidth={false}
                 type="submit"
                 variant="contained"
                 color="primary"
-                // className={classes.submit}
                 onClick={(e) => {
                   e.preventDefault();
                   postComment(newComment, null);
