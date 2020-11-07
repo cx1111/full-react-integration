@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from rest_framework import serializers
 
 from forum.models import Post, Comment
@@ -21,6 +23,16 @@ class CreatePostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'identifier', 'title', 'author', 'created_at')
         read_only_fields = ('id', 'created_at')
+
+    def validate_identifier(self, value):
+        validator = URLValidator()
+        try:
+            validator(value)
+        except ValidationError as invalid_identifier:
+            raise serializers.ValidationError(
+                'Identifier is invalid') from invalid_identifier
+
+        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
