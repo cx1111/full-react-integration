@@ -17,7 +17,6 @@
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash": "^4.14.165",
     "@types/next": "^9.0.0",
-    "@types/react-query": "^1.1.2",
     "axios": "^0.20.0",
     "date-fns": "^2.16.1",
     "gray-matter": "^4.0.2",
@@ -26,7 +25,6 @@
     "next": "9.5.4",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-query": "^2.26.2",
     "remark": "^12.0.0",
     "remark-html": "^11.0.1"
   },
