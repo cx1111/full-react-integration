@@ -15,6 +15,7 @@ import {
   forumAPI,
   ViewPostResponse,
   ListPostCommentsResponse,
+  ListCommentRepliesResponse,
   CreateCommentResponse,
   CreateCommentError,
 } from "../../lib/endpoints/forum";
@@ -75,6 +76,7 @@ const Posts: React.FC = ({}) => {
     },
   ] = useFetch<ViewPostResponse>({ loading: false });
 
+  // Top-level comments
   const [
     { data: commentsData, error: commentsError, loading: commentsLoading },
     {
@@ -83,6 +85,24 @@ const Posts: React.FC = ({}) => {
       setLoading: setCommentsLoading,
     },
   ] = useFetch<ListPostCommentsResponse>({ loading: false });
+
+  // Comment replies object/dictionary
+  const [replies, setReplies] = React.useState<
+    Record<string, ListCommentRepliesResponse>
+  >({});
+
+  // Load replies for a post
+  const loadReplies = async (commentId: string) => {
+    try {
+      const repliesResponse = await forumAPI.listCommentReplies(commentId);
+      setReplies((prevReplies) => ({
+        ...prevReplies,
+        [commentId]: repliesResponse.data,
+      }));
+    } catch (e) {
+      console.log("Failed to get replies", e);
+    }
+  };
 
   React.useEffect(() => {
     // TODO: 404 page?
@@ -131,10 +151,17 @@ const Posts: React.FC = ({}) => {
   }, [loadComments]);
 
   // List of comment ids that are set to show replies
+  // TODO: convert to dict
   const [showReplies, setShowReplies] = React.useState<string[]>([]);
 
   const toggleShowReply = (commentId: string) => {
+    // Load replies if necessary
+    if (!showReplies.includes(commentId) && !replies[commentId]) {
+      loadReplies(commentId);
+    }
+
     setShowReplies((prevShowReplies) => {
+      // Hide replies
       if (prevShowReplies.includes(commentId)) {
         const newShowReplies = remove(
           prevShowReplies,
@@ -142,6 +169,7 @@ const Posts: React.FC = ({}) => {
         );
         return newShowReplies;
       }
+      // Show replies
       return [...prevShowReplies, commentId];
     });
   };
@@ -174,7 +202,10 @@ const Posts: React.FC = ({}) => {
         accessToken
       );
 
-      // Some success alert
+      if (parentComment) {
+        loadReplies(parentComment);
+      }
+      // Always refresh top level comments. TODO: make robust to pagination.
       loadComments();
       setNewComment("");
       setNewReply("");
@@ -246,39 +277,41 @@ const Posts: React.FC = ({}) => {
                     <Button size="small" color="primary">
                       Reply
                     </Button>
-                    <Button
-                      size="small"
-                      color="primary"
-                      onClick={() => {
-                        toggleShowReply(comment.id);
-                      }}
-                    >
-                      {showReplies.includes(comment.id)
-                        ? "Hide Replies"
-                        : `${comment.num_replies} Replies`}
-                    </Button>
+                    {Boolean(comment.num_replies) && (
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          toggleShowReply(comment.id);
+                        }}
+                      >
+                        {showReplies.includes(comment.id)
+                          ? "Hide Replies"
+                          : `${comment.num_replies} Replies`}
+                      </Button>
+                    )}
                   </CardActions>
                   {/* Replies */}
-                  {showReplies.includes(comment.id) && (
+                  {showReplies.includes(comment.id) && replies[comment.id] && (
                     <CardActions>
                       <div className={classes.repliesSection}>
-                        {[1, 2, 3].map((el) => (
-                          <Card key={el} className={classes.commentCard}>
+                        {replies[comment.id].map((reply) => (
+                          <Card key={reply.id} className={classes.commentCard}>
                             <CardContent>
                               <Typography
                                 className={classes.pos}
                                 color="textSecondary"
                               >
-                                {`${comment.author.username} - ${displayDate(
-                                  comment.created_at
-                                )} - ${comment.id}`}
+                                {`${reply.author.username} - ${displayDate(
+                                  reply.created_at
+                                )} - ${reply.id}`}
                               </Typography>
                               <Typography
                                 variant="body2"
                                 component="p"
                                 className={classes.showBreaks}
                               >
-                                This is a good reply
+                                {reply.content}
                               </Typography>
                             </CardContent>
                           </Card>
