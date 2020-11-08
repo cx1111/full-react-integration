@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { makeStyles } from "@material-ui/core/styles";
 import Layout from "../components/Layout";
+import Alert from "@material-ui/lab/Alert";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import { Container, Typography } from "@material-ui/core";
@@ -125,10 +126,10 @@ const NewPost: React.FC = ({}) => {
               </Typography>
             )}
             {alreadyExistsLocation && (
-              <Typography color={"textPrimary"}>
+              <Alert severity="info">
                 A post with this identifier already exists. View it{" "}
                 <Link href={alreadyExistsLocation}>here</Link>
-              </Typography>
+              </Alert>
             )}
             <Button
               fullWidth
