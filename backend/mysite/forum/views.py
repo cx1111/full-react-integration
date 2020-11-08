@@ -1,6 +1,6 @@
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.parsers import JSONParser
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
@@ -40,6 +40,7 @@ class CreatePostView(APIView):
     - title: str
 
     """
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         data = JSONParser().parse(request)
@@ -48,7 +49,6 @@ class CreatePostView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)
-
         return Response(serializer.errors, status=400)
 
 
@@ -70,6 +70,22 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
         if username is not None:
             queryset = queryset.filter(author__username=username)
         return queryset
+
+
+class PostExistsView(APIView):
+    """
+    Check if a post exists by identifier.
+    """
+
+    def get(self, request):
+        identifier = request.query_params.get('identifier')
+        try:
+            post = Post.objects.get(identifier=identifier)
+        except (ValueError, Post.DoesNotExist):
+            return Response({"post": None}, status=200)
+
+        serializer = PostSerializer(post)
+        return Response({"post": serializer.data}, status=200)
 
 
 class PostCommentsViewSet(ListAPIView):
@@ -143,6 +159,7 @@ class CreateCommentView(APIView):
     - is_reply: bool
     - parent_comment: int fk, optional
     """
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         data = JSONParser().parse(request)
