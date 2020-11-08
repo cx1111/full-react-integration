@@ -58,6 +58,7 @@ const NavBar: FC = () => {
       <Toolbar className={classes.toolbar}>
         {/* Left side */}
         <div className={classes.navSide}>
+          {/* Site icon goes here */}
           <Link href={"/"}>
             <IconButton color="inherit">
               <WhatshotIcon />

@@ -2,10 +2,11 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Layout from "../../components/Layout";
 import Link from "next/link";
+import Grid from "@material-ui/core/Grid";
 import { Container, Typography } from "@material-ui/core";
 import { useFetch } from "../../hooks/useFetch";
 import { forumAPI, ListPostsResponse } from "../../lib/endpoints/forum";
-import { parseError } from "../../lib/endpoints/error";
+import { parseError, DefaultErrorMessage } from "../../lib/endpoints/error";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import { displayDate } from "../../lib/utils/date";
@@ -36,7 +37,7 @@ const Posts: React.FC = ({}) => {
       setError: setPostsError,
       setLoading: setPostsLoading,
     },
-  ] = useFetch<ListPostsResponse>({ loading: false });
+  ] = useFetch<ListPostsResponse, DefaultErrorMessage>({ loading: false });
 
   React.useEffect(() => {
     const getPosts = async () => {
@@ -57,32 +58,44 @@ const Posts: React.FC = ({}) => {
   return (
     <Layout>
       <Container maxWidth="lg">
-        <Typography variant={"h1"} component={"h1"}>
-          All Posts
-        </Typography>
-        {postsLoading && <p>Loading posts...</p>}
-        {postsError && <p>Error loading posts: {postsError}</p>}
-        {postsData ? (
-          postsData.length ? (
-            postsData.map((post) => (
-              <Card className={classes.root} variant="outlined" key={post.id}>
-                <CardContent>
-                  <Link href={`/posts/${post.id}/`}>
-                    <Typography variant="h5" component="h2">
-                      {post.title}
-                    </Typography>
-                  </Link>
-                  <Typography className={classes.pos} color="textSecondary">
-                    Posted by {post.author.username} on{" "}
-                    {displayDate(post.created_at)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <p>No posts to show</p>
-          )
-        ) : null}
+        <Grid container spacing={10}>
+          <Grid item xs={8}>
+            <Typography variant={"h1"} component={"h1"}>
+              All Posts
+            </Typography>
+            {postsLoading && <p>Loading posts...</p>}
+            {postsError && <p>Error loading posts: {postsError.detail}</p>}
+            {postsData ? (
+              postsData.length ? (
+                postsData.map((post) => (
+                  <Card
+                    className={classes.root}
+                    variant="outlined"
+                    key={post.id}
+                  >
+                    <CardContent>
+                      <Link href={`/posts/${post.id}/`}>
+                        <Typography variant="h5" component="h2">
+                          {post.title}
+                        </Typography>
+                      </Link>
+                      <Typography className={classes.pos} color="textSecondary">
+                        Posted by {post.author.username} on{" "}
+                        {displayDate(post.created_at)}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <p>No posts to show</p>
+              )
+            ) : null}
+          </Grid>
+          {/* Sidebar */}
+          {/* <Grid item xs={4}>
+            Hello everyone
+          </Grid> */}
+        </Grid>
       </Container>
     </Layout>
   );

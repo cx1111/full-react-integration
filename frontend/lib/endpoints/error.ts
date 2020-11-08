@@ -4,7 +4,7 @@ export interface SerializerError {
 }
 
 // DRF will use the 'detail' key for errors by default
-interface DefaultErrorMessage {
+export interface DefaultErrorMessage {
   detail: string;
 }
 
