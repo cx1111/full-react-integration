@@ -10,22 +10,32 @@ import {
   Typography,
   Button,
   makeStyles,
-  NoSsr,
 } from "@material-ui/core";
+import Tooltip from "@material-ui/core/Tooltip";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import ExitToApp from "@material-ui/icons/ExitToApp";
 import Brightness4 from "@material-ui/icons/Brightness4";
 import Brightness7 from "@material-ui/icons/Brightness7";
-import MenuIcon from "@material-ui/icons/Menu";
+import WhatshotIcon from "@material-ui/icons/Whatshot";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
 
-const useStyles = makeStyles((_theme) => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
   title: {
-    flexGrow: 1,
+    cursor: "pointer",
+    marginRight: theme.spacing(2),
+  },
+  toolbar: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  navSide: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
   },
 }));
 
@@ -44,36 +54,53 @@ const NavBar: FC = () => {
   };
 
   return (
-    <NoSsr>
-      <AppBar position="fixed" className={classes.root}>
-        <Toolbar>
-          <IconButton edge="start" color="inherit" aria-label="menu">
-            <MenuIcon />
-          </IconButton>
+    <AppBar position="fixed" className={classes.root}>
+      <Toolbar className={classes.toolbar}>
+        {/* Left side */}
+        <div className={classes.navSide}>
+          <Link href={"/"}>
+            <IconButton color="inherit">
+              <WhatshotIcon />
+            </IconButton>
+          </Link>
           <Link href={"/"}>
             <Typography variant="h6" className={classes.title}>
               Full React Integration
             </Typography>
           </Link>
+          <Link href={"/posts"}>
+            <Button color="inherit">Posts</Button>
+          </Link>
+          {user && (
+            <Link href={"/create-post"}>
+              <Button color="inherit">New Post</Button>
+            </Link>
+          )}
+        </div>
+
+        {/* Right side */}
+        <div className={classes.navSide}>
           <Link href={"/about"}>
             <Button color="inherit">About</Button>
           </Link>
-          {themeName === "light" ? (
-            <Brightness4 onClick={toggleThemeName} />
-          ) : (
-            <Brightness7 onClick={toggleThemeName} />
-          )}
+          <Tooltip title="Toggle light/dark">
+            <IconButton color="inherit" onClick={toggleThemeName}>
+              {themeName === "light" ? <Brightness4 /> : <Brightness7 />}
+            </IconButton>
+          </Tooltip>
           {user ? (
             <div>
-              <IconButton
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
+              <Tooltip title="Account">
+                <IconButton
+                  aria-label="account settings"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu}
+                  color="inherit"
+                >
+                  <AccountCircle />
+                </IconButton>
+              </Tooltip>
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
@@ -101,15 +128,17 @@ const NavBar: FC = () => {
             </div>
           ) : (
             <div>
-              <IconButton
-                aria-label="account links"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <ExitToApp />
-              </IconButton>
+              <Tooltip title="Login/Register">
+                <IconButton
+                  aria-label="account links"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu}
+                  color="inherit"
+                >
+                  <ExitToApp />
+                </IconButton>
+              </Tooltip>
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
@@ -135,9 +164,9 @@ const NavBar: FC = () => {
               </Menu>
             </div>
           )}
-        </Toolbar>
-      </AppBar>
-    </NoSsr>
+        </div>
+      </Toolbar>
+    </AppBar>
   );
 };
 
