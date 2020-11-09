@@ -32,6 +32,7 @@ class Post(models.Model):
 class Topic(models.Model):
     MAX_CHAR_LENGTH = 50
 
+    # TODO: name regex validator
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
     count = models.PositiveIntegerField(default=0)
 
