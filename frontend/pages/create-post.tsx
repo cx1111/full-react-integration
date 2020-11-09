@@ -84,6 +84,7 @@ const NewPost: React.FC = ({}) => {
         {
           title,
           identifier,
+          topics: topics.map((t) => t.value),
         },
         accessToken
       );
@@ -96,8 +97,8 @@ const NewPost: React.FC = ({}) => {
         setCreatePostError({ non_field_errors: [errorInfo.detail] });
       } else {
         setCreatePostError(errorInfo);
-        setCreatePostLoading(false);
       }
+      setCreatePostLoading(false);
     }
   };
 

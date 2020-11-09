@@ -46,6 +46,7 @@ export type ViewPostResponse = Post;
 export type CreatePostParams = {
   identifier: string;
   title: string;
+  topics: string[];
 };
 
 export interface CreatePostError extends SerializerError {

@@ -6,6 +6,7 @@ from django.core.validators import URLValidator
 from rest_framework import serializers
 
 from forum.models import Post, Comment
+from mysite.utils import unique
 from user.serializers import UserSerializer
 
 
@@ -19,10 +20,18 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class CreatePostSerializer(serializers.ModelSerializer):
+    # TODO: Serializing back to endpoint
+    topics = serializers.ListField(child=serializers.CharField())
+
     class Meta:
         model = Post
-        fields = ('id', 'identifier', 'title', 'author', 'created_at')
+        fields = ('id', 'identifier', 'title',
+                  'topics', 'author', 'created_at')
         read_only_fields = ('id', 'created_at')
+
+    def validate_topics(self, value):
+        # TODO: length and characters
+        return unique(v.lower() for v in value)
 
     def validate_identifier(self, value):
         validator = URLValidator()
@@ -34,6 +43,21 @@ class CreatePostSerializer(serializers.ModelSerializer):
 
         return value
 
+    def create(self, validated_data):
+        """
+        Create the post and attach topics
+        """
+        with transaction.atomic():
+            post = Post.objects.create(
+                identifier=validated_data['identifier'],
+                title=validated_data['title'],
+                author=validated_data['author']
+            )
+
+            for name in validated_data['topics']:
+                post.add_topic(name)
+
+        return post
 
 class CommentSerializer(serializers.ModelSerializer):
     """

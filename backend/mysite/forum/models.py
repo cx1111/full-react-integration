@@ -7,10 +7,36 @@ class Post(models.Model):
     author = models.ForeignKey('user.User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     num_comments = models.PositiveIntegerField(default=0)
+    topics = models.ManyToManyField(to='forum.Topic', related_name='posts')
 
     def __str__(self):
         return f'{self.title} - {self.identifier}'
 
+    def add_topic(self, name: str):
+        """
+        Add a topic to this comment
+        """
+        topic = Topic.objects.filter(name=name)
+
+        if topic:
+            topic = topic.get()
+        else:
+            topic = Topic.objects.create(name=name)
+
+        self.topics.add(topic)
+        # TODO: Proper increment
+        topic.count += 1
+        topic.save()
+
+
+class Topic(models.Model):
+    MAX_CHAR_LENGTH = 50
+
+    name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
+    count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.name} - {self.count} count'
 
 class Comment(models.Model):
     content = models.TextField(max_length=1000)
