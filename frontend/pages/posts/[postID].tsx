@@ -5,6 +5,7 @@ import Card from "@material-ui/core/Card";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
+import Chip from "@material-ui/core/Chip";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import Link from "next/link";
@@ -218,7 +219,6 @@ const Posts: React.FC = ({}) => {
       // Always refresh top level comments. TODO: make robust to pagination.
       loadComments();
       setNewComment("");
-      // setNewReply("");
       setNewReplies({});
       alert("Your comment has been posted!");
     } catch (e) {
@@ -252,6 +252,27 @@ const Posts: React.FC = ({}) => {
               Created by: {postData.author.username} at{" "}
               {displayDate(postData.created_at)}
             </p>
+            {/* <Paper component="ul"> */}
+            <div>
+              {postData.topics.map((topic) => {
+                return (
+                  // <li key={topic.name}>
+                  <Chip
+                    key={topic.name}
+                    // icon={icon}
+                    label={topic.name}
+                    color={"secondary"}
+                    // onDelete={
+                    //   data.label === "React" ? undefined : handleDelete(data)
+                    // }
+                    // className={classes.chip}
+                  />
+                  // </li>
+                );
+              })}
+            </div>
+            {/* </Paper> */}
+
             <Link href={"/posts"}>Back to Posts</Link>
             <hr />
           </>

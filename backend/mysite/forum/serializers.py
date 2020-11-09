@@ -5,24 +5,44 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from rest_framework import serializers
 
-from forum.models import Post, Comment
+from forum.models import Post, Comment, Topic
+from mysite.utils import unique
 from user.serializers import UserSerializer
+
+
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = ('id', 'name', 'count')
+        read_only_fields = ('id', 'name', 'count')
 
 
 class PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(many=False, read_only=True)
+    topics = TopicSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
-        fields = ('id', 'identifier', 'title', 'author', 'created_at')
-        read_only_fields = ('id',)
+        fields = ('id', 'identifier', 'title',
+                  'author', 'topics', 'created_at')
+        read_only_fields = ('id', 'author', 'created_at')
 
 
 class CreatePostSerializer(serializers.ModelSerializer):
+    topics = serializers.ListField(child=serializers.CharField())
+
     class Meta:
         model = Post
-        fields = ('id', 'identifier', 'title', 'author', 'created_at')
+        fields = ('id', 'identifier', 'title',
+                  'topics', 'author', 'created_at')
         read_only_fields = ('id', 'created_at')
+
+    def validate_topics(self, value):
+        for topic in value:
+            if len(topic) > Topic.MAX_CHAR_LENGTH:
+                raise serializers.ValidationError(
+                    f'Topics cannot be longer than {Topic.MAX_CHAR_LENGTH} characters')
+        return unique(v.lower() for v in value)
 
     def validate_identifier(self, value):
         validator = URLValidator()
@@ -33,6 +53,22 @@ class CreatePostSerializer(serializers.ModelSerializer):
                 'Identifier is invalid') from invalid_identifier
 
         return value
+
+    def create(self, validated_data):
+        """
+        Create the post and attach topics
+        """
+        with transaction.atomic():
+            post = Post.objects.create(
+                identifier=validated_data['identifier'],
+                title=validated_data['title'],
+                author=validated_data['author']
+            )
+
+            for name in validated_data['topics']:
+                post.add_topic(name)
+
+        return post
 
 
 class CommentSerializer(serializers.ModelSerializer):

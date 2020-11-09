@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { makeStyles } from "@material-ui/core/styles";
 import Layout from "../components/Layout";
+import CreatableSelect from "react-select/creatable";
 import Alert from "@material-ui/lab/Alert";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
@@ -16,6 +17,20 @@ import { useFetch } from "../hooks/useFetch";
 import { isDefaultError, parseError } from "../lib/endpoints/error";
 import { AuthContext } from "../context/AuthContext";
 import { ProtectedRoute } from "../components/RouteAuth";
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+const suggestedTopics: Option[] = [
+  { value: "black", label: "Black" },
+  { value: "blue", label: "Blue" },
+  { value: "green", label: "Green" },
+  { value: "red", label: "Red" },
+  { value: "white", label: "White" },
+  { value: "yellow", label: "Yellow" },
+];
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -34,6 +49,7 @@ const NewPost: React.FC = ({}) => {
 
   const [title, setTitle] = React.useState("");
   const [identifier, setIdentifier] = React.useState("");
+  const [topics, setTopics] = React.useState<Option[]>([]);
 
   const [alreadyExistsLocation, setAlreadyExistsLocation] = React.useState("");
 
@@ -68,6 +84,7 @@ const NewPost: React.FC = ({}) => {
         {
           title,
           identifier,
+          topics: topics.map((t) => t.value),
         },
         accessToken
       );
@@ -80,15 +97,15 @@ const NewPost: React.FC = ({}) => {
         setCreatePostError({ non_field_errors: [errorInfo.detail] });
       } else {
         setCreatePostError(errorInfo);
-        setCreatePostLoading(false);
       }
+      setCreatePostLoading(false);
     }
   };
 
   return (
     <ProtectedRoute>
       <Layout>
-        <Container maxWidth="lg">
+        <Container maxWidth="md">
           <Typography variant={"h2"} component={"h1"}>
             New Post
           </Typography>
@@ -120,6 +137,20 @@ const NewPost: React.FC = ({}) => {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
             />
+            <CreatableSelect
+              placeholder={"Topics"}
+              isMulti
+              options={suggestedTopics}
+              value={topics}
+              onChange={(newValue: any, _actionMeta: any) => {
+                setTopics(newValue);
+              }}
+            />
+            {createPostError?.topics && (
+              <Typography color={"error"}>
+                {createPostError.topics[0]}
+              </Typography>
+            )}
             {createPostError?.non_field_errors && (
               <Typography color={"error"}>
                 {createPostError.non_field_errors[0]}

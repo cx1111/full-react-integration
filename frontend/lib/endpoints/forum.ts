@@ -10,6 +10,7 @@ type Post = {
     username: string;
   };
   created_at: string;
+  topics: Topic[];
 };
 
 type Comment = {
@@ -23,6 +24,12 @@ type Comment = {
   };
   created_at: string;
   edited_at: string;
+};
+
+type Topic = {
+  id: string;
+  name: string;
+  count: string;
 };
 
 // Request params
@@ -46,11 +53,13 @@ export type ViewPostResponse = Post;
 export type CreatePostParams = {
   identifier: string;
   title: string;
+  topics: string[];
 };
 
 export interface CreatePostError extends SerializerError {
   title?: string[];
   identifier?: string[];
+  topics?: string[];
 }
 
 export type CreatePostResponse = Post;
