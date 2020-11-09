@@ -48,6 +48,8 @@ class CreatePostView(APIView):
         serializer = CreatePostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            # Use the read/modify serializer to return the topics
+            serializer = PostSerializer(instance=serializer.instance)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 

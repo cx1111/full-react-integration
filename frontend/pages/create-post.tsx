@@ -146,6 +146,11 @@ const NewPost: React.FC = ({}) => {
                 setTopics(newValue);
               }}
             />
+            {createPostError?.topics && (
+              <Typography color={"error"}>
+                {createPostError.topics[0]}
+              </Typography>
+            )}
             {createPostError?.non_field_errors && (
               <Typography color={"error"}>
                 {createPostError.non_field_errors[0]}
