@@ -182,15 +182,35 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TopicSerializer
     queryset = Topic.objects.all().order_by('-count')[:50]
 
-    # def get_queryset(self):
-    #     """
-    #     Optionally filters posts by the `username` parameter
-    #     """
-    #     queryset = Post.objects.all().order_by('created_at')
-    #     username = self.request.query_params.get('username')
-    #     if username is not None:
-    #         queryset = queryset.filter(author__username=username)
-    #     return queryset
+
+class FollowingTopicsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    List of topics that the user is following
+
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TopicSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Topic.objects.filter(following_users__in=[user])
 
 
-# class FollowTopicView
+class FollowTopicView(APIView):
+    """
+    Follow a topic
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data = JSONParser().parse(request)
+
+        try:
+            topic = Topic.objects.get(id=data.get('topic_id'))
+        except (ValueError, Topic.DoesNotExist):
+            return Response({"detail": "No topic with specified id"}, status=400)
+
+        if request.user not in topic.followed_users.all():
+            Topic.following_users.add(request.user)
+        # Return success even if already followed
+        return Response('', status=204)

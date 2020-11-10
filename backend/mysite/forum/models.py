@@ -36,8 +36,12 @@ class Topic(models.Model):
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
     count = models.PositiveIntegerField(default=0)
 
+    following_users = models.ManyToManyField(
+        'user.User', related_name='following_topics')
+
     def __str__(self):
         return f'{self.name} - {self.count} count'
+
 
 class Comment(models.Model):
     content = models.TextField(max_length=1000)
@@ -51,6 +55,8 @@ class Comment(models.Model):
         'user.User', on_delete=models.CASCADE, related_name='comments')
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(blank=True, null=True)
+
+
 
     def __str__(self):
         return f'{self.content[:20]}'
