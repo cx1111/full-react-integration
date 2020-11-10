@@ -73,9 +73,14 @@ const NavBar: FC = () => {
             <Button color="inherit">Posts</Button>
           </Link>
           {user && (
-            <Link href={"/create-post"}>
-              <Button color="inherit">New Post</Button>
-            </Link>
+            <>
+              <Link href={"/create-post"}>
+                <Button color="inherit">New Post</Button>
+              </Link>
+              <Link href={"/follow"}>
+                <Button color="inherit">Follow</Button>
+              </Link>
+            </>
           )}
         </div>
 

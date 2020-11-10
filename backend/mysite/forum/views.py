@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
 
-from forum.models import Comment, Post
-from forum.serializers import CommentSerializer, CreateCommentSerializer, PostSerializer, CreatePostSerializer
+from forum.models import Comment, Post, Topic
+from forum.serializers import CommentSerializer, CreateCommentSerializer, PostSerializer, CreatePostSerializer, TopicSerializer
 
 
 class PostView(RetrieveUpdateDestroyAPIView):
@@ -172,3 +172,25 @@ class CreateCommentView(APIView):
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
+
+
+class TopicViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    View a set of topics.
+
+    """
+    serializer_class = TopicSerializer
+    queryset = Topic.objects.all().order_by('-count')[:50]
+
+    # def get_queryset(self):
+    #     """
+    #     Optionally filters posts by the `username` parameter
+    #     """
+    #     queryset = Post.objects.all().order_by('created_at')
+    #     username = self.request.query_params.get('username')
+    #     if username is not None:
+    #         queryset = queryset.filter(author__username=username)
+    #     return queryset
+
+
+# class FollowTopicView

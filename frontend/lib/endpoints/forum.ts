@@ -81,6 +81,8 @@ export type CreateCommentResponse = {
   // There are others...
 };
 
+export type ListTopicsResponse = Topic[];
+
 export interface CreateCommentError extends SerializerError {
   content?: string[];
 }
@@ -125,6 +127,9 @@ class ForumAPI {
       { ...params },
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
+
+  listTopics = (): AxiosPromise<ListTopicsResponse> =>
+    API.request.get("/api/topics/");
 }
 
 export const forumAPI = new ForumAPI();

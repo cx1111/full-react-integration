@@ -18,4 +18,7 @@ urlpatterns = [
          views.PostCommentsViewSet.as_view(), name='post_comments'),
     path('api/comment/<pk>/replies/',
          views.CommentRepliesViewSet.as_view(), name='comment_replies'),
+
+    path('api/topics/',
+         views.TopicViewSet.as_view({'get': 'list'}), name='list_topics'),
 ]
