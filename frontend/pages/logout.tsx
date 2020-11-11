@@ -4,16 +4,18 @@ import { AuthContext } from "../context/AuthContext";
 
 const Logout: React.FC = ({}) => {
   const router = useRouter();
-  const { user, authLoading, clearAuthInfo } = React.useContext(AuthContext);
+  const { isAuthenticated, authLoading, clearAuthInfo } = React.useContext(
+    AuthContext
+  );
 
   React.useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       clearAuthInfo();
     }
     if (!authLoading && process.browser) {
       router.push("/");
     }
-  }, [user, authLoading, clearAuthInfo, router]);
+  }, [isAuthenticated, authLoading, clearAuthInfo, router]);
   return null;
 };
 

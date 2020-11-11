@@ -7,15 +7,15 @@ export const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({
   children,
 }) => {
   const router = useRouter();
-  const { user, authLoading } = React.useContext(AuthContext);
+  const { isAuthenticated, authLoading } = React.useContext(AuthContext);
 
   React.useEffect(() => {
-    if (!authLoading && !user && process.browser) {
+    if (!authLoading && !isAuthenticated && process.browser) {
       router.push("/login");
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, isAuthenticated, router]);
 
-  if (user) {
+  if (isAuthenticated) {
     return children;
   }
   return null;
@@ -27,15 +27,15 @@ export const NoAuthRoute: React.FC<{
   children: JSX.Element;
 }> = ({ redirectTo, children }) => {
   const router = useRouter();
-  const { user, authLoading } = React.useContext(AuthContext);
+  const { isAuthenticated, authLoading } = React.useContext(AuthContext);
 
   React.useEffect(() => {
-    if (!authLoading && user && process.browser && redirectTo) {
+    if (!authLoading && isAuthenticated && process.browser && redirectTo) {
       router.push(redirectTo);
     }
-  }, [redirectTo, authLoading, user, router]);
+  }, [redirectTo, authLoading, isAuthenticated, router]);
 
-  if (!authLoading && !user) {
+  if (!authLoading && !isAuthenticated) {
     return children;
   }
   return null;

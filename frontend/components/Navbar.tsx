@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 
 const NavBar: FC = () => {
   const classes = useStyles();
-  const { user } = React.useContext(AuthContext);
+  const { isAuthenticated } = React.useContext(AuthContext);
   const { themeName, toggleThemeName } = React.useContext(ThemeContext);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
@@ -72,7 +72,7 @@ const NavBar: FC = () => {
           <Link href={"/posts"}>
             <Button color="inherit">Posts</Button>
           </Link>
-          {user && (
+          {isAuthenticated && (
             <>
               <Link href={"/create-post"}>
                 <Button color="inherit">New Post</Button>
@@ -94,7 +94,7 @@ const NavBar: FC = () => {
               {themeName === "light" ? <Brightness4 /> : <Brightness7 />}
             </IconButton>
           </Tooltip>
-          {user ? (
+          {isAuthenticated ? (
             <div>
               <Tooltip title="Account">
                 <IconButton

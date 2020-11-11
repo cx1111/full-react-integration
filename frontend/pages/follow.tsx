@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Follow: React.FC = ({}) => {
   const classes = useStyles();
-  const { accessToken, user } = React.useContext(AuthContext);
+  const { accessToken, isAuthenticated } = React.useContext(AuthContext);
 
   // Displayed topics
   const [
@@ -108,7 +108,7 @@ const Follow: React.FC = ({}) => {
 
   React.useEffect(() => {
     loadTopics();
-  }, [loadTopics, user]);
+  }, [loadTopics, isAuthenticated]);
 
   const handleFollowTopic = (topicId: number) => {
     if (!accessToken) {
