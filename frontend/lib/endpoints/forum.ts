@@ -81,11 +81,17 @@ export type CreateCommentResponse = {
   // There are others...
 };
 
-export type ListTopicsResponse = Topic[];
-
 export interface CreateCommentError extends SerializerError {
   content?: string[];
 }
+
+export type ListTopicsResponse = Topic[];
+
+export type ListFollowedTopicsResponse = Topic[];
+
+export type FollowTopicParams = {
+  topic_id: string;
+};
 
 class ForumAPI {
   viewPost = (postId: string): AxiosPromise<ViewPostResponse> =>
@@ -130,6 +136,23 @@ class ForumAPI {
 
   listTopics = (): AxiosPromise<ListTopicsResponse> =>
     API.request.get("/api/topics/");
+
+  listFollowedTopics = (
+    accessToken: string
+  ): AxiosPromise<ListFollowedTopicsResponse> =>
+    API.request.get("/api/followed-topics/", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+  followTopic = (
+    topicId: string,
+    accessToken: string
+  ): AxiosPromise<CreateCommentResponse> =>
+    API.request.post(
+      `/api/topic/${topicId}/follow/`,
+      {},
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
 }
 
 export const forumAPI = new ForumAPI();

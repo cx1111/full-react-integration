@@ -183,7 +183,7 @@ class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Topic.objects.all().order_by('-count')[:50]
 
 
-class FollowingTopicsViewSet(viewsets.ReadOnlyModelViewSet):
+class FollowedTopicsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     List of topics that the user is following
 
@@ -202,11 +202,9 @@ class FollowTopicView(APIView):
     """
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
-        data = JSONParser().parse(request)
-
+    def post(self, request, pk):
         try:
-            topic = Topic.objects.get(id=data.get('topic_id'))
+            topic = Topic.objects.get(pk=pk)
         except (ValueError, Topic.DoesNotExist):
             return Response({"detail": "No topic with specified id"}, status=400)
 
