@@ -27,7 +27,7 @@ type Comment = {
 };
 
 type Topic = {
-  id: string;
+  id: number;
   name: string;
   count: string;
 };
@@ -145,7 +145,7 @@ class ForumAPI {
     });
 
   followTopic = (
-    topicId: string,
+    topicId: number,
     accessToken: string
   ): AxiosPromise<CreateCommentResponse> =>
     API.request.post(

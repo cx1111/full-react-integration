@@ -193,7 +193,7 @@ class FollowedTopicsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Topic.objects.filter(following_users__in=[user])
+        return Topic.objects.filter(followed_users__in=[user])
 
 
 class FollowTopicView(APIView):
@@ -209,6 +209,6 @@ class FollowTopicView(APIView):
             return Response({"detail": "No topic with specified id"}, status=400)
 
         if request.user not in topic.followed_users.all():
-            Topic.following_users.add(request.user)
+            topic.followed_users.add(request.user)
         # Return success even if already followed
         return Response('', status=204)

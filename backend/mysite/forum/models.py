@@ -36,8 +36,8 @@ class Topic(models.Model):
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
     count = models.PositiveIntegerField(default=0)
 
-    following_users = models.ManyToManyField(
-        'user.User', related_name='following_topics')
+    followed_users = models.ManyToManyField(
+        'user.User', related_name='followed_topics')
 
     def __str__(self):
         return f'{self.name} - {self.count} count'

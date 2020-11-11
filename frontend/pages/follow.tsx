@@ -1,4 +1,5 @@
 import React from "react";
+import { omit } from "lodash";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { Button, Container, Typography } from "@material-ui/core";
 import List from "@material-ui/core/List";
@@ -26,7 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Follow: React.FC = ({}) => {
   const classes = useStyles();
-  const { accessToken } = React.useContext(AuthContext);
+  const { accessToken, user } = React.useContext(AuthContext);
 
   // Displayed topics
   const [
@@ -38,15 +39,35 @@ const Follow: React.FC = ({}) => {
     },
   ] = useFetch<ListTopicsResponse>({ loading: true });
 
+  // const [
+  //   { data: followedTopicsData, loading: followedTopicsLoading },
+  //   {
+  //     setData: setFollowedTopicsData,
+  //     setError: setFollowedTopicsError,
+  //     setLoading: setFollowedTopicsLoading,
+  //   },
+  // ] = useFetch<Record<string, boolean>>({ loading: true });
+
   // Topics followed by the user
-  const [
-    { data: followedTopicsData, loading: followedTopicsLoading },
-    {
-      setData: setFollowedTopicsData,
-      setError: setFollowedTopicsError,
-      setLoading: setFollowedTopicsLoading,
+  const [followedTopics, setFollowedTopics] = React.useReducer(
+    (
+      topics: Record<number, boolean>,
+      update: {
+        // Either the full object, or a key to set to true
+        item: number | Record<number, boolean>;
+        action: "add" | "remove";
+      }
+    ): Record<number, boolean> => {
+      if (typeof update.item !== "number") {
+        return update.item;
+      }
+      if (update.action === "add") {
+        return { ...topics, [update.item]: true };
+      }
+      return omit(topics, update.item);
     },
-  ] = useFetch<Record<string, boolean>>({ loading: true });
+    {}
+  );
 
   const loadTopics = React.useCallback(async () => {
     if (!accessToken) {
@@ -62,21 +83,18 @@ const Follow: React.FC = ({}) => {
         setTopicsError(errorInfo.detail);
       }
       setTopicsData(undefined);
-    } finally {
       setTopicsLoading(false);
     }
 
     // Load followed topics
     try {
-      setFollowedTopicsLoading(true);
+      // setFollowedTopicsLoading(true);
       const response = await forumAPI.listFollowedTopics(accessToken);
-
       const followed = response.data.reduce(function (map, topic) {
         map[topic.id] = true;
         return map;
-      }, {} as Record<string, boolean>);
-
-      setFollowedTopicsData(followed);
+      }, {} as Record<number, boolean>);
+      setFollowedTopics({ item: followed, action: "add" });
     } catch (e) {
       const errorInfo = parseError<null>(e);
       if (errorInfo) {
@@ -86,18 +104,19 @@ const Follow: React.FC = ({}) => {
     } finally {
       setTopicsLoading(false);
     }
-  }, [setTopicsData, setTopicsLoading, setTopicsError]);
+  }, [setTopicsData, setTopicsLoading, setTopicsError, accessToken]);
 
   React.useEffect(() => {
     loadTopics();
-  }, [loadTopics, accessToken]);
+  }, [loadTopics, user]);
 
-  const handleFollowTopic = (topicId: string) => {
+  const handleFollowTopic = (topicId: number) => {
     if (!accessToken) {
       return;
     }
     try {
       forumAPI.followTopic(topicId, accessToken);
+      setFollowedTopics({ item: topicId, action: "add" });
     } catch (e) {}
   };
 
@@ -121,15 +140,19 @@ const Follow: React.FC = ({}) => {
                   <>
                     <ListItem>
                       <ListItemText primary={topic.name} />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        aria-label="follow"
-                        onClick={() => handleFollowTopic(topic.id)}
-                      >
-                        Follow
-                      </Button>
+                      {followedTopics[topic.id] ? (
+                        <Button>Unfollow</Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          aria-label="follow"
+                          onClick={() => handleFollowTopic(topic.id)}
+                        >
+                          Follow
+                        </Button>
+                      )}
                     </ListItem>
                     <Divider />
                   </>
