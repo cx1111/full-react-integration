@@ -120,6 +120,16 @@ const Follow: React.FC = ({}) => {
     } catch (e) {}
   };
 
+  const handleUnfollowTopic = (topicId: number) => {
+    if (!accessToken) {
+      return;
+    }
+    try {
+      forumAPI.unfollowTopic(topicId, accessToken);
+      setFollowedTopics({ item: topicId, action: "remove" });
+    } catch (e) {}
+  };
+
   return (
     <ProtectedRoute>
       <Layout>
@@ -141,10 +151,17 @@ const Follow: React.FC = ({}) => {
                     <ListItem>
                       <ListItemText primary={topic.name} />
                       {followedTopics[topic.id] ? (
-                        <Button>Unfollow</Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          aria-label="unfollow"
+                          onClick={() => handleUnfollowTopic(topic.id)}
+                        >
+                          Unfollow
+                        </Button>
                       ) : (
                         <Button
-                          variant="contained"
+                          variant="outlined"
                           color="primary"
                           size="small"
                           aria-label="follow"

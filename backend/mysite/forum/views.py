@@ -198,17 +198,25 @@ class FollowedTopicsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class FollowTopicView(APIView):
     """
-    Follow a topic
+    Follow/unfollow a topic
     """
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, pk):
+    def post(self, request, pk, action):
         try:
             topic = Topic.objects.get(pk=pk)
         except (ValueError, Topic.DoesNotExist):
             return Response({"detail": "No topic with specified id"}, status=400)
 
-        if request.user not in topic.followed_users.all():
-            topic.followed_users.add(request.user)
-        # Return success even if already followed
-        return Response('', status=204)
+        if action == 'follow':
+            if request.user not in topic.followed_users.all():
+                topic.followed_users.add(request.user)
+            # Return success even if already followed
+            return Response('', status=204)
+        elif action == 'unfollow':
+            if request.user in topic.followed_users.all():
+                topic.followed_users.remove(request.user)
+            # Return success even if already not followed
+            return Response('', status=204)
+        else:
+            return Response({"detail": "Invalid action"}, status=400)

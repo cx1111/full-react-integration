@@ -23,6 +23,6 @@ urlpatterns = [
          views.TopicViewSet.as_view({'get': 'list'}), name='list_topics'),
     path('api/followed-topics/',
          views.FollowedTopicsViewSet.as_view({'get': 'list'}), name='followed_topics'),
-    path('api/topic/<pk>/follow/',
-         views.FollowTopicView.as_view(), name='follow_topic'),
+    path('api/topic/<pk>/<action>/',
+         views.FollowTopicView.as_view(), name='follow_unfollow_topic'),
 ]

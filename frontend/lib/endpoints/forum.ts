@@ -144,12 +144,19 @@ class ForumAPI {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-  followTopic = (
-    topicId: number,
-    accessToken: string
-  ): AxiosPromise<CreateCommentResponse> =>
+  followTopic = (topicId: number, accessToken: string): AxiosPromise<unknown> =>
     API.request.post(
       `/api/topic/${topicId}/follow/`,
+      {},
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+  unfollowTopic = (
+    topicId: number,
+    accessToken: string
+  ): AxiosPromise<unknown> =>
+    API.request.post(
+      `/api/topic/${topicId}/unfollow/`,
       {},
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
