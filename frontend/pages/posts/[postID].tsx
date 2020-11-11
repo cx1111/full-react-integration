@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Posts: React.FC = ({}) => {
   const router = useRouter();
-  const { accessToken } = React.useContext(AuthContext);
+  const { accessToken, isAuthenticated } = React.useContext(AuthContext);
   const postID =
     typeof router.query.postID === "string" ? router.query.postID : "";
   const classes = useStyles();
@@ -306,7 +306,7 @@ const Posts: React.FC = ({}) => {
                     <Button size="small" color="primary">
                       Share
                     </Button>
-                    {accessToken && (
+                    {isAuthenticated && (
                       <Button
                         size="small"
                         color="primary"
@@ -342,7 +342,7 @@ const Posts: React.FC = ({}) => {
                     <CardActions>
                       <div className={classes.repliesSection}>
                         {/* Reply form */}
-                        {accessToken ? (
+                        {isAuthenticated ? (
                           <form className={classes.replyForm}>
                             <TextField
                               multiline
@@ -415,7 +415,7 @@ const Posts: React.FC = ({}) => {
           )}
         </div>
         <div className={classes.commentForm}>
-          {accessToken ? (
+          {isAuthenticated ? (
             <form className={classes.form}>
               <TextField
                 multiline

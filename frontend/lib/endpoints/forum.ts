@@ -27,7 +27,7 @@ type Comment = {
 };
 
 type Topic = {
-  id: string;
+  id: number;
   name: string;
   count: string;
 };
@@ -85,6 +85,14 @@ export interface CreateCommentError extends SerializerError {
   content?: string[];
 }
 
+export type ListTopicsResponse = Topic[];
+
+export type ListFollowedTopicsResponse = Topic[];
+
+export type FollowTopicParams = {
+  topic_id: string;
+};
+
 class ForumAPI {
   viewPost = (postId: string): AxiosPromise<ViewPostResponse> =>
     API.request.get(`/api/post/${postId}`);
@@ -123,6 +131,33 @@ class ForumAPI {
     API.request.post(
       "/api/create-comment/",
       { ...params },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+  listTopics = (): AxiosPromise<ListTopicsResponse> =>
+    API.request.get("/api/topics/");
+
+  listFollowedTopics = (
+    accessToken: string
+  ): AxiosPromise<ListFollowedTopicsResponse> =>
+    API.request.get("/api/followed-topics/", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+  followTopic = (topicId: number, accessToken: string): AxiosPromise<unknown> =>
+    API.request.post(
+      `/api/topic/${topicId}/follow/`,
+      {},
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+  unfollowTopic = (
+    topicId: number,
+    accessToken: string
+  ): AxiosPromise<unknown> =>
+    API.request.post(
+      `/api/topic/${topicId}/unfollow/`,
+      {},
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
 }

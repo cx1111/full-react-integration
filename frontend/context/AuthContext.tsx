@@ -8,11 +8,13 @@ interface AuthInfo {
   accessToken: string | null;
   refreshToken: string | null;
   user: User | null;
+  isAuthenticated: boolean;
   // Loading param here instead of AuthProps to ensure status is updated
   // with main info, due to async and batched hook updates
   authLoading: boolean;
 }
 
+// Data to set for an authenticated user
 interface PresentAuthInfo {
   accessToken: string;
   refreshToken: string;
@@ -29,6 +31,7 @@ const initialInfo: AuthInfo = {
   accessToken: null,
   refreshToken: null,
   user: null,
+  isAuthenticated: false,
   authLoading: true,
 };
 
@@ -57,7 +60,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   // Set the valid authentication info in global context and localstorage
   const setAuth = React.useCallback(
     (authInfo: PresentAuthInfo) => {
-      setAuthInfo({ ...authInfo, authLoading: false });
+      setAuthInfo({ ...authInfo, isAuthenticated: true, authLoading: false });
       localStorage.setItem(REFRESH_TOKEN_KEY, authInfo.refreshToken);
     },
     [setAuthInfo]
@@ -71,6 +74,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       accessToken: null,
       refreshToken: null,
       user: null,
+      isAuthenticated: false,
       authLoading: false,
     });
     try {

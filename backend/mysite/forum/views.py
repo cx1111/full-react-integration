@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
 
-from forum.models import Comment, Post
-from forum.serializers import CommentSerializer, CreateCommentSerializer, PostSerializer, CreatePostSerializer
+from forum.models import Comment, Post, Topic
+from forum.serializers import CommentSerializer, CreateCommentSerializer, PostSerializer, CreatePostSerializer, TopicSerializer
 
 
 class PostView(RetrieveUpdateDestroyAPIView):
@@ -172,3 +172,51 @@ class CreateCommentView(APIView):
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
+
+
+class TopicViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    View a set of topics.
+
+    """
+    serializer_class = TopicSerializer
+    queryset = Topic.objects.all().order_by('-count')[:50]
+
+
+class FollowedTopicsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    List of topics that the user is following
+
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TopicSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Topic.objects.filter(followed_users__in=[user])
+
+
+class FollowTopicView(APIView):
+    """
+    Follow/unfollow a topic
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk, action):
+        try:
+            topic = Topic.objects.get(pk=pk)
+        except (ValueError, Topic.DoesNotExist):
+            return Response({"detail": "No topic with specified id"}, status=400)
+
+        if action == 'follow':
+            if request.user not in topic.followed_users.all():
+                topic.followed_users.add(request.user)
+            # Return success even if already followed
+            return Response('', status=204)
+        elif action == 'unfollow':
+            if request.user in topic.followed_users.all():
+                topic.followed_users.remove(request.user)
+            # Return success even if already not followed
+            return Response('', status=204)
+        else:
+            return Response({"detail": "Invalid action"}, status=400)
