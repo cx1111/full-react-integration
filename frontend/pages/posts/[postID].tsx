@@ -6,12 +6,13 @@ import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import Chip from "@material-ui/core/Chip";
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import Layout from "../../components/Layout";
-import Link from "next/link";
 import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
-import { useFetch } from "../../hooks/useFetch";
+import Link from "next/link";
+import Layout from "components/Layout";
+import { useFetch } from "hooks/useFetch";
 import {
   forumAPI,
   ViewPostResponse,
@@ -19,10 +20,14 @@ import {
   ListCommentRepliesResponse,
   CreateCommentResponse,
   CreateCommentError,
-} from "../../lib/endpoints/forum";
-import { parseError, isDefaultError } from "../../lib/endpoints/error";
-import { displayDate } from "../../lib/utils/date";
-import { AuthContext } from "../../context/AuthContext";
+} from "lib/endpoints/forum";
+import {
+  parseError,
+  DefaultErrorMessage,
+  isDefaultError,
+} from "lib/endpoints/error";
+import { displayDate } from "lib/utils/date";
+import { AuthContext } from "context/AuthContext";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -64,21 +69,24 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Posts: React.FC = ({}) => {
+interface Props {
+  postData: ViewPostResponse | null;
+  postError: DefaultErrorMessage | null;
+  commentsData: ListPostCommentsResponse | null;
+  commentsError: DefaultErrorMessage | null;
+}
+
+const Posts: React.FC<Props> = ({
+  postData,
+  postError,
+  commentsData: initialCommentsData,
+  commentsError: initialCommentsError,
+}) => {
   const router = useRouter();
   const { accessToken, isAuthenticated } = React.useContext(AuthContext);
   const postID =
     typeof router.query.postID === "string" ? router.query.postID : "";
   const classes = useStyles();
-
-  const [
-    { data: postData, error: postError, loading: postLoading },
-    {
-      setData: setPostData,
-      setError: setPostError,
-      setLoading: setPostLoading,
-    },
-  ] = useFetch<ViewPostResponse>({ loading: false });
 
   // Top-level comments
   const [
@@ -88,7 +96,11 @@ const Posts: React.FC = ({}) => {
       setError: setCommentsError,
       setLoading: setCommentsLoading,
     },
-  ] = useFetch<ListPostCommentsResponse>({ loading: false });
+  ] = useFetch<ListPostCommentsResponse, DefaultErrorMessage>({
+    data: initialCommentsData || undefined,
+    error: initialCommentsError || undefined,
+    loading: false,
+  });
 
   // Comment replies object/dictionary
   const [replies, setReplies] = React.useState<
@@ -108,29 +120,6 @@ const Posts: React.FC = ({}) => {
     }
   };
 
-  React.useEffect(() => {
-    // TODO: 404 page?
-    const getPosts = async () => {
-      if (postID === "") {
-        return;
-      }
-      try {
-        setPostLoading(true);
-        const response = await forumAPI.viewPost(postID);
-        setPostData(response.data);
-      } catch (e) {
-        const errorInfo = parseError<null>(e);
-        if (errorInfo) {
-          setPostError(errorInfo.detail);
-        }
-        setPostData(undefined);
-      } finally {
-        setPostLoading(false);
-      }
-    };
-    getPosts();
-  }, [postID, setPostData, setPostLoading, setPostError]);
-
   const loadComments = React.useCallback(async () => {
     if (postID === "") {
       return;
@@ -142,7 +131,7 @@ const Posts: React.FC = ({}) => {
     } catch (e) {
       const errorInfo = parseError<null>(e);
       if (errorInfo) {
-        setCommentsError(errorInfo.detail);
+        setCommentsError(errorInfo);
       }
       setCommentsData(undefined);
     } finally {
@@ -240,7 +229,6 @@ const Posts: React.FC = ({}) => {
   return (
     <Layout>
       <Container maxWidth="lg">
-        {postLoading && <p>Loading post...</p>}
         {postError && <p>Error loading post: {postError}</p>}
         {postData && (
           <>
@@ -283,7 +271,9 @@ const Posts: React.FC = ({}) => {
             Comments
           </Typography>
           {commentsLoading && <p>Loading comments...</p>}
-          {commentsError && <p>Error loading comments: {commentsError}</p>}
+          {commentsError && (
+            <p>Error loading comments: {commentsError.detail}</p>
+          )}
           {commentsData && (
             <>
               {commentsData.map((comment) => (
@@ -456,3 +446,37 @@ const Posts: React.FC = ({}) => {
 };
 
 export default Posts;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  let postData: ViewPostResponse | null = null;
+  let postError: DefaultErrorMessage | null = null;
+
+  let commentsData: ListPostCommentsResponse | null = null;
+  let commentsError: DefaultErrorMessage | null = null;
+
+  if (typeof context.params?.postID === "string") {
+    try {
+      const response = await forumAPI.viewPost(context.params.postID);
+      postData = response.data;
+    } catch (e) {
+      postError = parseError(e);
+    }
+
+    // Load top-level comments
+    try {
+      const response = await forumAPI.listPostComments(context.params.postID);
+      commentsData = response.data;
+    } catch (e) {
+      commentsError = parseError(e);
+    }
+  }
+
+  return {
+    props: {
+      postData,
+      postError,
+      commentsData,
+      commentsError,
+    },
+  };
+};

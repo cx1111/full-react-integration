@@ -1,14 +1,9 @@
 import React from "react";
-import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { Button, Container, Typography } from "@material-ui/core";
 import Layout from "../components/Layout";
 
-interface Props {
-  location: string;
-}
-
-const About: React.FC<Props> = ({ location }) => {
+const About: React.FC = () => {
   return (
     <Layout>
       <Container maxWidth="lg">
@@ -28,11 +23,3 @@ const About: React.FC<Props> = ({ location }) => {
 };
 
 export default About;
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  return {
-    props: {
-      location: "USA",
-    },
-  };
-};
