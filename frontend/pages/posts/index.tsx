@@ -1,15 +1,15 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Layout from "../../components/Layout";
+import { GetServerSideProps } from "next";
 import Link from "next/link";
+import CardContent from "@material-ui/core/CardContent";
+import Card from "@material-ui/core/Card";
 import Grid from "@material-ui/core/Grid";
 import { Container, Typography } from "@material-ui/core";
-import { useFetch } from "../../hooks/useFetch";
-import { forumAPI, ListPostsResponse } from "../../lib/endpoints/forum";
-import { parseError, DefaultErrorMessage } from "../../lib/endpoints/error";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import { displayDate } from "../../lib/utils/date";
+import Layout from "components/Layout";
+import { forumAPI, ListPostsResponse } from "lib/endpoints/forum";
+import { parseError, DefaultErrorMessage } from "lib/endpoints/error";
+import { displayDate } from "lib/utils/date";
 
 const useStyles = makeStyles({
   root: {
@@ -28,32 +28,13 @@ const useStyles = makeStyles({
   },
 });
 
-const Posts: React.FC = ({}) => {
-  const classes = useStyles();
-  const [
-    { data: postsData, error: postsError, loading: postsLoading },
-    {
-      setData: setPostsData,
-      setError: setPostsError,
-      setLoading: setPostsLoading,
-    },
-  ] = useFetch<ListPostsResponse, DefaultErrorMessage>({ loading: false });
+interface Props {
+  postsData: ListPostsResponse | null;
+  postsError: DefaultErrorMessage | null;
+}
 
-  React.useEffect(() => {
-    const getPosts = async () => {
-      try {
-        setPostsLoading(true);
-        const response = await forumAPI.listPosts();
-        setPostsData(response.data);
-      } catch (e) {
-        setPostsError(parseError(e));
-        setPostsData(undefined);
-      } finally {
-        setPostsLoading(false);
-      }
-    };
-    getPosts();
-  }, [setPostsData, setPostsLoading, setPostsError]);
+const Posts: React.FC<Props> = ({ postsData, postsError }) => {
+  const classes = useStyles();
 
   return (
     <Layout>
@@ -63,7 +44,6 @@ const Posts: React.FC = ({}) => {
             <Typography variant={"h1"} component={"h1"}>
               All Posts
             </Typography>
-            {postsLoading && <p>Loading posts...</p>}
             {postsError && <p>Error loading posts: {postsError.detail}</p>}
             {postsData ? (
               postsData.length ? (
@@ -102,3 +82,21 @@ const Posts: React.FC = ({}) => {
 };
 
 export default Posts;
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  let postsData: ListPostsResponse | null = null;
+  let postsError: DefaultErrorMessage | null = null;
+  try {
+    const response = await forumAPI.listPosts();
+    postsData = response.data;
+  } catch (e) {
+    postsError = parseError(e);
+  }
+
+  return {
+    props: {
+      postsData,
+      postsError,
+    },
+  };
+};
