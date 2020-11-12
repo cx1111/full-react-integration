@@ -11,7 +11,6 @@ const About: React.FC = () => {
           About This Site
         </Typography>
         <div>This is a simple about page you can mess with to test things.</div>
-        <div>You are in {location}</div>
         <Link href="/" as={`/`}>
           <Button component={"a"} variant="contained" color="primary">
             Return Home
